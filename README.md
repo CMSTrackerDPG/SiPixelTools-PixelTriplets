@@ -1,6 +1,23 @@
 # Pixel Triplet Code
 
-Tested for CMSSW version : `CMSSW_11_1_0_pre1`
+Measure hit resolution in BPix using the triplet method.
+
+
+## Software setup
+
+Prepare your working directory with CMSSW
+
+```
+export SCRAM_ARCH=slc7_amd64_gcc820
+cmsrel CMSSW_11_1_4
+cd CMSSW_11_1_4/src
+cmsenv
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
+scram b -j 8
+cd SiPixelTools/PixelTriplets/
+```
+
+## Running the code
 
 Run with cmsRun
 
