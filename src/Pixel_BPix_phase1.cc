@@ -1177,7 +1177,7 @@ void Histos::init(TFileDirectory* fs)
   h418 = fs->make<TProfile>( "h418", "PXB2 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
   h419 = fs->make<TProfile>( "h419", "PXB2 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB2 <#Deltax> [#mum]", 20, 0, 2, -99, 99 );
 
-  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 150, -150, 150 );
+  h420 = fs->make<TH1D>( "h420", "PXB2 residuals #Deltax, p_{t} > 12;PXB2 #Deltax [#mum];hits", 3000, -150, 150 ); //CUSTOM was 150 bin
   h420_out_zplus = fs->make<TH1D>( "h420_out_zplus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_out_zminus = fs->make<TH1D>( "h420_out_zminus", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in_zplus = fs->make<TH1D>( "h420_in_zplus", "PXB2 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -1186,7 +1186,7 @@ void Histos::init(TFileDirectory* fs)
   h421_out_zminus = fs->make<TH1D>( "h421_out_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, outward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421_in_zplus = fs->make<TH1D>( "h421_in_zplus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z+;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
   h421_in_zminus = fs->make<TH1D>( "h421_in_zminus", "PXB2 residuals #Deltaz, p_{t} > 12, inward-facing modules, z-;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
-  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 300, -300, 300 );
+  h421 = fs->make<TH1D>( "h421", "PXB2 residuals #Deltaz, p_{t} > 12;PXB2 #Deltaz [#mum];hits", 3000, -300, 300 ); //CUSTOM was 300 bins
 
   h420_out = fs->make<TH1D>( "h420_out", "PXB2 residuals #Deltax, p_{t} > 12, outward-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
   h420_in = fs->make<TH1D>( "h420_in", "PXB2 residuals #Deltax, p_{t} > 12, in-facing modules;PXB2 #Deltax [#mum];hits", 100, -150, 150 );
@@ -2545,8 +2545,8 @@ void Histos::init(TFileDirectory* fs)
 
   g518 = fs->make<TProfile>( "g518", "PXB4 #Deltax vs p_{t} +;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
   g519 = fs->make<TProfile>( "g519", "PXB4 #Deltax vs p_{t} -;log(p_{t} [GeV]);PXB4 <#Deltax> [#mum]", 20, 0, 2, -199, 199 );
-
-  g520 = fs->make<TH1D>( "g520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 150, -150, 150 );
+  
+  g520 = fs->make<TH1D>( "g520", "PXB4 residuals #Deltax, p_{t} > 12;PXB4 #Deltax [#mum];hits", 3000, -150, 150 ); //CUSTOM was 150 bins
   g520_out_zplus = fs->make<TH1D>( "g520_out_zplus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
   g520_out_zminus = fs->make<TH1D>( "g520_out_zminus", "PXB4 residuals #Deltax, p_{t} > 12, outward-facing modules, z-;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
   g520_in_zplus = fs->make<TH1D>( "g520_in_zplus", "PXB4 residuals #Deltax, p_{t} > 12, inward-facing modules, z+;PXB4 #Deltax [#mum];hits", 3000, -150, 150 );
@@ -3681,16 +3681,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     h036->Fill( hp.numberOfValidPixelBarrelHits() );
     h037->Fill( hp.trackerLayersWithMeasurement() );
     h038->Fill( hp.pixelBarrelLayersWithMeasurement() );
-
-    if(pt>12)     {
+    //CUSTOM was pt>12
+    if(pt>2)     {
       h037_1->Fill( hp.trackerLayersWithMeasurement() );
       h040->Fill( iTrack->normalizedChi2());
       h041->Fill( iTrack->ptError());
       h042->Fill( iTrack->qualityMask());
       h043->Fill( hp.trackerLayersWithMeasurement(), iTrack->normalizedChi2());
       h044->Fill( hp.trackerLayersWithMeasurement(), iTrack->ptError());
-
-    } else if(pt>4) {
+      //CUSTOM was pt>4
+    } else if(pt>2) {
       h037_2->Fill( hp.trackerLayersWithMeasurement() );
       h045->Fill( hp.trackerLayersWithMeasurement(), iTrack->normalizedChi2());
       h046->Fill( hp.trackerLayersWithMeasurement(), iTrack->ptError());
@@ -3742,7 +3742,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     //double sbca = bcap / ebca;//impact parameter significance
 
     if( hp.trackerLayersWithMeasurement() < 7 ) continue; // select only tracks which go into the strips
-
+    //CUSTOM was < 7
     // if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) && hp.trackerLayersWithMeasurement() > 7 ) {
     //   if( pt > 8 ) {
 
@@ -5010,13 +5010,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	     tTopo->pxbLayer(detId) == 1 ) {
 
 	    // resolution: biased reasiduals in PXB1
-
-	    if( pt >  4 ) k100->Fill( dx*1E4 );
-	    if( pt > 12 ) k101->Fill( dx*1E4 );
+	    //CUSTOM was pt>4
+	    if( pt >  2 ) k100->Fill( dx*1E4 );
+	    //CUSTOM was pt>12
+	    if( pt > 2 ) k101->Fill( dx*1E4 );
 
 	    //k102->Fill( logpt, abs(dx)*1E4 ); // increasing: seeding bias
-
-	    if( pt > 4 ) {
+	    //CUSTOM was pt>4
+	    if( pt > 2 ) {
 
 	      k103->Fill( alf_inc*wt ); //at +-90 deg
 	      k104->Fill( bet_inc*wt ); //-80 to + 80 deg
@@ -5063,13 +5064,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	  if( //PXBDetId( detId ).layer()
 	     tTopo->pxbLayer(detId) == 2 ) {
-
-	    if( pt >  4 ) k120->Fill( dx*1E4 );
-	    if( pt > 12 ) k121->Fill( dx*1E4 );
+	    //CUSTOM was pt>4
+	    if( pt >  2 ) k120->Fill( dx*1E4 );
+	    //CUSTOM was pt>12
+	    if( pt > 2 ) k121->Fill( dx*1E4 );
 
 	    //k122->Fill( logpt, abs(dx)*1E4 );//decreasing, as expected
-
-	    if( pt > 4 ) {
+	    //CUSTOM was pt>4
+	    if( pt > 2 ) {
 
 	      k123->Fill( alf_inc*wt ); //at +-90 deg
 	      k124->Fill( bet_inc*wt ); //
@@ -5116,13 +5118,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//layer
 
 	  if(tTopo->pxbLayer(detId)== 3 ) {
-
-	    if( pt >  4 ) k140->Fill( dx*1E4 );
-	    if( pt > 12 ) k141->Fill( dx*1E4 );
+	    //CUSTOM was pt>4
+	    if( pt >  2 ) k140->Fill( dx*1E4 );
+	    //CUSTOM was pt>12
+	    if( pt > 2 ) k141->Fill( dx*1E4 );
 
 	    //k142->Fill( logpt, abs(dx)*1E4 );
-
-	    if( pt > 4 ) {
+	    //CUSTOM was pt>4
+	    if( pt > 2 ) {
 
 	      k143->Fill( alf_inc*wt ); //at +-90 deg
 	      k144->Fill( bet_inc*wt ); //
@@ -6136,7 +6139,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	else if( ilad2 == 24 ) halfmod = 1;
 	else if( ilad2 == 25 ) halfmod = 1;
 	*/
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  // h308->Fill( bb/aa ); // lever arm
 	  hf409->Fill( f2*wt, phiinc*wt );
@@ -6165,8 +6169,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	} // pt > 4
 
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 	  //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
 	  //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  if( PXB2_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB2_clusSizeX > 1 && PXB2_clusSizeY > 1 ){
@@ -6386,8 +6390,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	} // pt > 12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  hf412->Fill( f2*wt, dca2*1E4 );
 	  hf413->Fill( f2*wt, dz2*1E4 );
 
@@ -6415,8 +6419,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  hf422->Fill( f2*wt, abs(dca2)*1E4 );
 	  hf423->Fill( f2*wt, abs(dz2)*1E4 );
@@ -6576,15 +6580,15 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  double s = ks*rho;// signed
 	  double uz2 = uz0 + s*tandip; //track z at R2
 	  double dz2 = zPXB2 - uz2;
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 	    hf508->Fill( bb/aa );//lever arm
 	    hf509->Fill( f2*wt, phiinc*wt );
 	    hf510->Fill( dca2*1E4 );
 	    hf511->Fill( dz2*1E4 );
 	  }
-
-	  if( pt > 12 ) {
+	  //CUSTOM was pt>12
+	  if( pt > 2 ) {
 
 	    hf520->Fill( dca2*1E4 );
 	    hf521->Fill( dz2*1E4 );
@@ -6644,8 +6648,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//pt>12
 
 	  // residual profiles: alignment check
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 	    hf512->Fill( f2*wt, dca2*1E4 );
 	    hf513->Fill( f2*wt, dz2*1E4 );
 
@@ -6662,8 +6666,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 
 	    hf522->Fill( f2*wt, abs(dca2)*1E4 );
 	    hf523->Fill( f2*wt, abs(dz2)*1E4 );
@@ -6805,16 +6809,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  double s = ks*rho;// signed
 	  double uz4 = uz0 + s*tandip; //track z at R4
 	  double dz4 = zPXB4 - uz4;
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 	    g507->Fill( bb/aa );//lever arm
 	    g508->Fill( f4*wt, bb/aa );//lever arm
 	    g509->Fill( f4*wt, phiinc*wt );
 	    g510->Fill( dca4*1E4 );
 	    g511->Fill( dz4*1E4 );
 	  }
-
-	  if( pt > 12 ) {
+	  //CUSTOM was pt>12
+	  if( pt > 2 ) {
 
 	    g520->Fill( dca4*1E4 );
 	    g521->Fill( dz4*1E4 );
@@ -6875,8 +6879,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//pt>12
 
 	  // residual profiles: alignment check
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 	    g512->Fill( f4*wt, dca4*1E4 );
 	    g513->Fill( f4*wt, dz4*1E4 );
 
@@ -6904,8 +6908,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 
 	    g522->Fill( f4*wt, abs(dca4)*1E4 );
 	    g523->Fill( f4*wt, abs(dz4)*1E4 );
@@ -7148,7 +7152,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       	  else if( ilad3 == 24 ) halfmod = 1;
       	  else if( ilad3 == 25 ) halfmod = 1;
 	  */
-      	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+      	  if( pt > 2 ) {
 
       	    hg308->Fill( bb/aa ); // lever arm
       	    hg409->Fill( f3*wt, phiinc*wt );
@@ -7177,8 +7182,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
       	  } // pt > 4
 
-
-      	  if( pt > 12 ) {
+	  //CUSTOM was pt>12
+      	  if( pt > 2 ) {
       	    //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
       	    //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
       	    if( PXB3_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB3_clusSizeX > 1 && PXB3_clusSizeY > 1 ){
@@ -7414,8 +7419,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  } // pt > 12
 
 	  // residual profiles: alignment check
-
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 	    hg412->Fill( f3*wt, dca3*1E4 );
 	    hg413->Fill( f3*wt, dz3*1E4 );
 
@@ -7444,7 +7449,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 
-	  if( pt > 4 ) {
+	  //CUSTOM was pt>4
+	  if( pt > 2 ) {
 
 	    hg422->Fill( f3*wt, abs(dca3)*1E4 );
 	    hg423->Fill( f3*wt, abs(dz3)*1E4 );
@@ -7878,15 +7884,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double uz4 = uz0 + s*tandip; //track z at R4
 	double dz4 = zPXB4 - uz4;
 
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  f507->Fill( bb/aa );//lever arm
 	  f508->Fill( f4*wt, bb/aa );//lever arm
 	  f509->Fill( f4*wt, phiinc*wt );
 	  f510->Fill( dca4*1E4 );
 	  f511->Fill( dz4*1E4 );
 	}
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 
 	  f520->Fill( dca4*1E4 );
 	  f521->Fill( dz4*1E4 );
@@ -7932,8 +7939,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  f512->Fill( f4*wt, dca4*1E4 );
 	  f513->Fill( f4*wt, dz4*1E4 );
 
@@ -7962,7 +7969,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  f522->Fill( f4*wt, abs(dca4)*1E4 );
 	  f523->Fill( f4*wt, abs(dz4)*1E4 );
@@ -8203,7 +8211,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// else if( ilad2 == 24 ) halfmod = 1;
 	// else if( ilad2 == 25 ) halfmod = 1;
 
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  h308->Fill( bb/aa ); // lever arm
 	  h409->Fill( f2*wt, phiinc*wt );
@@ -8232,8 +8241,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	} // pt > 4
 
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 	  //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
 	  //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  if( PXB2_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB3_clusProb >0.5 && PXB2_clusSizeX > 1 && PXB2_clusSizeY > 1 ){
@@ -8473,8 +8482,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	} // pt > 12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  h412->Fill( f2*wt, dca2*1E4 );
 	  h413->Fill( f2*wt, dz2*1E4 );
 
@@ -8504,8 +8513,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 	//For the properties of the folded normal distribution with mean 0.
 	////https://en.wikipedia.org/wiki/Folded_normal_distribution
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  h422->Fill( f2*wt, abs(dca2)*1E4 );
 	  h423->Fill( f2*wt, abs(dz2)*1E4 );
@@ -8586,8 +8595,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}
 
 	// full modules:
-
-	if( pt > 4.0 &&
+	//CUSTOM was pt>4
+	if( pt > 2.0 &&
 	    xmin2 > 0 && xmax2 < 159 && // skip edges
 	    xmin2 != 79 && xmax2 != 79 &&  // skip wide pixels
 	    xmin2 != 80 && xmax2 != 80 ) { // skip wide pixels
@@ -8646,8 +8655,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }
 
 	  // highest pt:
-
-	  if( pt > 12 ) {
+	  //CUSTOM was pt>12
+	  if( pt > 2 ) {
 
 	    if(      lpix*1E4 > 30 && lpix*1E4 < 70 ) h438->Fill( dca2*1E4 ); // 9.1 um
 	    else if( lpix*1E4 < 20 || lpix*1E4 > 80 ) h439->Fill( dca2*1E4 ); // 17.0, two peaks
@@ -8753,8 +8762,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	  //if( nrow2 == 2 ) {
 	  if( nrow2 < 3 ) {
-
-	    if( pt > 12 && lpix*1E4 > 30 && lpix*1E4 < 70 ) h449->Fill( dca2*1E4 );//9.2
+	    //CUSTOM was pt>12
+	    if( pt > 2 && lpix*1E4 > 30 && lpix*1E4 < 70 ) h449->Fill( dca2*1E4 );//9.2
 
 	    h245->Fill( tpix*1E4, etaX2 ); // x from track
 
@@ -8939,15 +8948,15 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho2;// signed
 	double uz2 = uz0 + s*tandip; //track z at R2
 	double dz2 = zPXB2 - uz2;
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  h456->Fill( (kap2 - kap) / kap );
 	  h459->Fill( f2*wt, phiinc*wt );
 	  h460->Fill( dca2*1E4 );
 	  h461->Fill( dz2*1E4 );
 	}
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 
 	  h470->Fill( dca2*1E4 );
 	  h471->Fill( dz2*1E4 );
@@ -8980,8 +8989,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  h462->Fill( f2*wt, dca2*1E4 );
 	  h463->Fill( f2*wt, dz2*1E4 );
 
@@ -8998,8 +9007,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  h472->Fill( f2*wt, abs(dca2)*1E4 );
 	  h473->Fill( f2*wt, abs(dz2)*1E4 );
@@ -9144,15 +9153,15 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho;// signed
 	double uz1 = uz0 + s*tandip; //track z at R1
 	double dz1 = zPXB1 - uz1;
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  h508->Fill( bb/aa );//lever arm
 	  h509->Fill( f1*wt, phiinc*wt );
 	  h510->Fill( dca1*1E4 );
 	  h511->Fill( dz1*1E4 );
 	}
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
@@ -9266,8 +9275,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  h512->Fill( f1*wt, dca1*1E4 );
 	  h513->Fill( f1*wt, dz1*1E4 );
 
@@ -9284,8 +9293,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  h522->Fill( f1*wt, abs(dca1)*1E4 );
 	  h523->Fill( f1*wt, abs(dz1)*1E4 );
@@ -9451,16 +9460,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho;// signed
 	double uz3 = uz0 + s*tandip; //track z at R3
 	double dz3 = zPXB3 - uz3;
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  i507->Fill( bb/aa );//lever arm
 	  i508->Fill( f3*wt, bb/aa );//lever arm
 	  i509->Fill( f3*wt, phiinc*wt );
 	  i510->Fill( dca3*1E4 );
 	  i511->Fill( dz3*1E4 );
 	}
-
-	if( pt > 12 ) {
+	//CUSTOM was pt>12
+	if( pt > 2 ) {
 
 	  i520->Fill( dca3*1E4 );
 	  i521->Fill( dz3*1E4 );
@@ -9506,8 +9515,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 	  i512->Fill( f3*wt, dca3*1E4 );
 	  i513->Fill( f3*wt, dz3*1E4 );
 
@@ -9535,8 +9544,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-	if( pt > 4 ) {
+	//CUSTOM was pt>4
+	if( pt > 2 ) {
 
 	  i522->Fill( f3*wt, abs(dca3)*1E4 );
 	  i523->Fill( f3*wt, abs(dz3)*1E4 );
@@ -9662,10 +9671,11 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       h559->Fill( DCA - dcap );
 
       double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
-
-      if( pt > 4 ) {
+      //CUSTOM was pt>4
+      if( pt > 2 ) {
 	h560->Fill( DCA*1E4 );
-	if( pt > 12 ) h561->Fill( DCA*1E4 );
+	//CUSTOM was pt>12
+	if( pt > 2 ) h561->Fill( DCA*1E4 );
 	h562->Fill( f2*wt, DCA*1E4 );
 	h564->Fill( f2*wt, abs(DCA)*1E4 );
       }
@@ -10188,15 +10198,15 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
       if( phiinc > pihalf ) phiinc -= pi;
       else if( phiinc < -pihalf ) phiinc += pi;
-
-      if( pt > 4 ) {
+      //CUSTOM was pt>4
+      if( pt > 2 ) {
 	h607->Fill( bb/aa );//lever arm
 	h608->Fill( phiinc*wt );
 	h609->Fill( f1*wt, phiinc*wt );
 	h610->Fill( dca1*1E4 );
       }
-
-      if( pt > 12 ) {
+      //CUSTOM was pt>12
+      if( pt > 2 ) {
 
 	h620->Fill( dca1*1E4 );
         if( abs( phi1 - phiN1 ) < pihalf ) // outward facing module
@@ -10244,8 +10254,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       }
 
       // residual profiles: alignment check
-
-      if( pt > 4 ) {
+      //CUSTOM was pt>4
+      if( pt > 2 ) {
 	h612->Fill( f1*wt, dca1*1E4 );
 	h614->Fill( zPXB1, dca1*1E4 );
 
@@ -10269,8 +10279,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-
-      if( pt > 4 ) {
+      //CUSTOM was pt>4
+      if( pt > 2 ) {
 
 	h622->Fill( f1*wt, abs(dca1)*1E4 );
 

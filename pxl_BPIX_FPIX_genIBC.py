@@ -1,14 +1,10 @@
-# Auto generated configuration file
-# using:
-# Revision: 1.19
-# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v
-# with command line options: RECO -s RAW2DIGI,L1Reco,RECO --data --scenario pp --conditions 92X_dataRun2_Prompt_forTier0Replay_PixelLocalReco_TkAl_newVCal_v2 --era Run2_2017 --process NTUPLE --eventcontent RECO --datatier RECO --filein /store/data/Tier0_REPLAY_vocms015/ZeroBias/RECO/PromptReco-v141/00000/6658E50E-9A65-E711-A4F9-02163E011C17.root --python_filename=run_Resolution_ReReco_Data_92X_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
+import HLTrigger.HLTfilters.hltHighLevel_cfi
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('NTUPLE',eras.Run2_2017)
+process = cms.Process('NTUPLE',eras.Run3)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -30,9 +26,9 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-options.inputFiles = ["root://t3dcachedb.psi.ch//pnfs/psi.ch/cms/trivcat/store/user/koschwei/pixel/res/ALCARECOs_historical/316758/162.root"]
+options.inputFiles = [""]#only needed for running local
 options.maxEvents = -1
-options.outputFile = "Resolution.root"
+options.outputFile = "tree.root"
 options.parseArguments()
 
 
@@ -54,7 +50,7 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # Output definition
 ########## ACTIVATE THIS FOR RUNNING GEN+IBC METHOD ##########
-# process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True # gen + IBC
+#process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True # gen + IBC
 ##############################################################
 process.RECOoutput = cms.OutputModule("PoolOutputModule",
     dataset = cms.untracked.PSet(
@@ -71,7 +67,9 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '110X_dataRun2_v12', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '120X_dataRun3_Prompt_Candidate_2021_11_22_18_14_35', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '120X_dataRun3_Express_v2', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '121X_mcRun3_2021_realistic_forpp900GeV_v4', '')
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
@@ -90,19 +88,26 @@ associatePatAlgosToolsTask(process)
 
 # Refitter
 
-# process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-
-process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
-process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+process.MeasurementTrackerEvent.pixelClusterProducer = 'siPixelClusters'
+process.MeasurementTrackerEvent.stripClusterProducer = 'siStripClusters'
 process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag()
 
 
-process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
+#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
+process.TrackRefitter.src = 'generalTracks'
 process.TrackRefitter.TrajectoryInEvent = True
 process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.MeasurementTrackerEvent * process.TrackRefitter)
 
-# process.TrackRefitter_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter)
+process.HLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+    HLTPaths = ['HLT_*PixelCluster*'],
+    throw = False #dont throw except on unknown path names
+)
+process.hltFilter_step = cms.Path(process.HLTFilter)
+
+#process.TrackRefitter_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter)
 
 #------------------------------------------
 #  Define your Analyzer(s) here
@@ -112,7 +117,8 @@ process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.Measurem
 process.BPixResolution_Template = cms.EDAnalyzer('Pixel_BPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuon')#generalTracks
+                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuon')#generalTracks
+                                                 track_collection = cms.string('generalTracks'),
 )
 process.BPixResolution_Generic = process.BPixResolution_Template.clone(
     ttrhBuilder = cms.string('WithTrackAngle')
@@ -122,7 +128,8 @@ process.BPixResolution_Generic = process.BPixResolution_Template.clone(
 process.FPixResolution_Template = cms.EDAnalyzer('Pixel_FPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),#generalTracks
+                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),#generalTracks
+                                                 track_collection=cms.string('generalTracks'),
                                                  doBPix = cms.bool(False),
                                                  doFPix = cms.bool(True)
 )
@@ -144,6 +151,7 @@ process.schedule = cms.Schedule(
 #    process.raw2digi_step,
 #    process.L1Reco_step,
 #    process.reconstruction_step,
+    process.hltFilter_step,
     process.TrackRefitter_step,
     process.FPixResolution_step,
     process.BPixResolution_step
@@ -162,3 +170,7 @@ process=convertToUnscheduled(process)
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
 # End adding early deletion
+
+#processDumpFile = open('fullconfig.txt', 'w')
+#print (process.dumpPython(),file=processDumpFile)
+#processDumpFile.close()

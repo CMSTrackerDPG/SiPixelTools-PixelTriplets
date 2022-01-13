@@ -213,6 +213,11 @@ private:
   std::vector<float> pt_resolution_study_refit;
   int number_of_tracks;
   std::vector<float> pt_all_tracks;
+  std::vector<float> pt_4_tracks;
+  std::vector<float> pt_12_tracks;
+  std::vector<float> pt_highlayerswithmeasurements;
+  std::vector<float> pt_lowlayerswithmeasurements;
+  std::vector<float> TrackerLayersWithMeasurements;
   std::vector<int> cluster_size_all_tracks;
   std::vector<int> hits_on_track_barrel;
   std::vector<int> hits_on_track_endcap;
@@ -413,6 +418,11 @@ Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
   tree->Branch("hits_on_track_tracker", &hits_on_track_tracker);
   tree->Branch("runNumber_res", &runNumber_res);
   tree->Branch("lumiBlock_res", &lumiBlock_res);
+  tree->Branch("pt_4_tracks", &pt_4_tracks);
+  tree->Branch("pt_12_tracks", &pt_12_tracks);
+  tree->Branch("pt_highlayerswithmeasurements", &pt_highlayerswithmeasurements);
+  tree->Branch("pt_lowlayerswithmeasurements", &pt_lowlayerswithmeasurements);
+  tree->Branch("TrackerLayersWithMeasurements", &TrackerLayersWithMeasurements);
 }
 Pixel_FPix_phase1::~Pixel_FPix_phase1()
 {
@@ -750,6 +760,11 @@ void Pixel_FPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
   pt_resolution_study.clear();
   pt_resolution_study_refit.clear();
   pt_all_tracks.clear();
+  pt_4_tracks.clear();
+  pt_12_tracks.clear();
+  pt_highlayerswithmeasurements.clear();
+  pt_lowlayerswithmeasurements.clear();
+  TrackerLayersWithMeasurements.clear();
   cluster_size_all_tracks.clear();
   hits_on_track_barrel.clear();
   hits_on_track_endcap.clear();
@@ -768,7 +783,6 @@ void Pixel_FPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
   hits_endcap = 0;
   ls_with_measure = 0;
   number_of_tracks = 0;
-  
 
   if(doFPix ){
     std::string detTag = "fpix";
@@ -832,7 +846,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   // beam spot:
   
   edm::Handle<reco::BeamSpot> rbs;
-  //  iEvent.getByLabel( "offlineBeamSpot", rbs );
+  //iEvent.getByLabel( "offlineBeamSpot", rbs );
   iEvent.getByToken( t_offlineBeamSpot_, rbs );
 
   XYZPoint bsP = XYZPoint(0,0,0);        // beam spot point
@@ -863,7 +877,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   //--------------------------------------------------------------------
   // primary vertices:
   Handle<VertexCollection> vertices;
-  //  iEvent.getByLabel( "offlinePrimaryVertices", vertices );
+  //iEvent.getByLabel( "offlinePrimaryVertices", vertices );
   iEvent.getByToken( t_offlinePrimaryVertices_,vertices );
   if( vertices.failedToGet() ) return;
   if( !vertices.isValid() ) return;
@@ -893,7 +907,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   // MET:
   
   edm::Handle< edm::View<reco::PFMET> > pfMEThandle;
-  //  iEvent.getByLabel( "pfMet", pfMEThandle );
+  //iEvent.getByLabel( "pfMet", pfMEThandle );
   iEvent.getByToken(t_pfMet_, pfMEThandle );
   //--------------------------------------------------------------------
   // get a fitter to refit TrackCandidates, the same fitter as used in standard reconstruction:
@@ -946,7 +960,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   //--------------------------------------------------------------------
   // tracks:
   Handle<TrackCollection> tracks;
-  //  iEvent.getByLabel( "generalTracks", tracks );
+  //iEvent.getByLabel( "generalTracks", tracks );
   iEvent.getByToken( t_generalTracks_, tracks );
 
   if( tracks.failedToGet() ) return;
@@ -993,7 +1007,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   double sumpt = 0;     // total pt of tracks from vtx
   double sumq = 0;      // total charge from vtx
   // Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
-  //number_of_tracks = tracks->size();
+  number_of_tracks = tracks->size();
   runNumber_res = iEvent.run();
   lumiBlock_res = iEvent.luminosityBlock();
   for( TrackCollection::const_iterator iTrack = tracks->begin();
@@ -1017,9 +1031,10 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     isTriplet = true;
     double pt = iTrack->pt();
 
-    //numberOfTracksCount++;
-    //pt_all_tracks.push_back(pt);
-
+    numberOfTracksCount++;
+    pt_all_tracks.push_back(pt);
+    pt_12_tracks.push_back(pt);
+   
     if( abs( iTrack->dxy(vtxP) ) > 5*iTrack->dxyError() ) continue; // if trans. IP > 5x its error, skip
     sumpt += pt;
     sumq += iTrack->charge();
@@ -1051,8 +1066,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     h037->Fill( hp.trackerLayersWithMeasurement() );
     h038->Fill( hp.pixelBarrelLayersWithMeasurement() );
     h039->Fill( hp.pixelEndcapLayersWithMeasurement() );
-
-    if(pt>4)     {
+    //CUSTOM was pt>4
+    if(pt>2)     {
       h037_1->Fill( hp.trackerLayersWithMeasurement() );
       h040->Fill( iTrack->normalizedChi2());
       h041->Fill( iTrack->ptError());
@@ -1108,9 +1123,13 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       }
     }//long tracks
     */
-
+    TrackerLayersWithMeasurements.push_back(hp.trackerLayersWithMeasurement());
+    if( hp.trackerLayersWithMeasurement() < 7 ){
+      pt_lowlayerswithmeasurements.push_back(pt);
+    };
     if( hp.trackerLayersWithMeasurement() < 7 ) continue;
-
+    //CUSTOM was < 7
+    pt_highlayerswithmeasurements.push_back(pt);
     // transient track:    
     TransientTrack tTrack = theB->build(*iTrack);
     TrajectoryStateOnSurface initialTSOS = tTrack.innermostMeasurementState();
@@ -1125,7 +1144,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     // rec hits from track extra:
     if( iTrack->extra().isNull() ) continue;//next track
     if( ! iTrack->extra().isAvailable() ) continue;//next track
-
     uint32_t innerDetId = 0;
     double xPX1 = 0;      // global x hit 1
     double yPX1 = 0;      // global y hit 1
@@ -1209,7 +1227,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     Trajectory::RecHitContainer coTTRHvec;                           // for fit, constant
     
     // loop over recHits on this track:
-
     for( trackingRecHit_iterator irecHit = iTrack->recHitsBegin();
 	 irecHit != iTrack->recHitsEnd(); ++irecHit ) {
       DetId detId = (*irecHit)->geographicalId();                          // get detector 
@@ -1543,7 +1560,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 
     //------------------------------------------------------------------------
     // refit the track:
-    
     PTrajectoryStateOnDet PTraj = trajectoryStateTransform::persistentState( initialTSOS, innerDetId );
     const TrajectorySeed seed( PTraj, recHitVector, alongMomentum );
     
@@ -1858,7 +1874,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 
     //------------------------------------------------------------------------
     // 1-2-3 pixel triplet:
-    
     if( n1*n2*n3 > 0 ) {
 
       {// let's open a scope, so we can redefine the variables further down
@@ -1949,9 +1964,10 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount123++;
           }
-	  
-	  if(pt>4){
-
+	  //pt_12_tracks.push_back(pt);
+	  //CUSTOM was pt>4
+	  if(pt>2){
+	    pt_4_tracks.push_back(pt);
 	    dx_res_1 = residual_x_2;
 	    dz_res_1 = residual_y_2;
 
@@ -2003,9 +2019,9 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  
-	  if(pt>12){	  
-	    
+	  //CUSTOM was pt>12
+	  if(pt>2){	  
+	    //pt_12_tracks.push_back(pt);
 	    h420b1_123->Fill( residual_x_1 );
 	    h421b1_123->Fill( residual_y_1 );
 
@@ -2113,8 +2129,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount124++;
 	  }
-
-	  if(pt>4){
+          //CUSTOM was pt>4
+	  if(pt>2){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2152,8 +2168,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  
-	  if(pt>12){	  
+	  //CUSTOM was pt>12
+	  if(pt>2){	  
 	    
 	    h420b1_124->Fill( residual_x_1 );
 	    h421b1_124->Fill( residual_y_1 );
@@ -2261,8 +2277,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount134++;
 	  }
-
-	  if(pt>4){
+          //CUSTOM was pt>4
+	  if(pt>2){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2300,8 +2316,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  
-	  if(pt>12){	  
+	  //CUSTOM was pt>12
+	  if(pt>2){	  
 	    
 	    h420b1_134->Fill( residual_x_1 );
 	    h421b1_134->Fill( residual_y_1 );
@@ -2472,8 +2488,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount234++;
           }
-	  
-	  if(pt>4){
+	  //CUSTOM was pt>4
+	  if(pt>2){
 
 	    dx_res_2 = residual_x_3;
 	    dz_res_2 = residual_y_3;
@@ -2544,8 +2560,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  
-	  if(pt>12){	  
+	  //CUSTOM was pt>12
+	  if(pt>2){	  
 	    
 	    h420b2_234->Fill( residual_x_2 );
 	    h421b2_234->Fill( residual_y_2 );
