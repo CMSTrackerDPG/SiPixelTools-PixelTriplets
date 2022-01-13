@@ -42,9 +42,10 @@ Remarks:
 
 - Gen+IBC method can be activated by uncommenting the line `process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True` in `pxl_BPIX_FPIX_genIBC.py`
 
-##Running the code with CRAB
+## Running the code with CRAB
 
-An example for a CRAB submit file is included. Change 
+An example for a CRAB submit file is included. Change following lines:
+ 
 -`config.General.requestName` 
 -`config.Data.inputDataset` DAS path to file
 -`config.Data.outputDatasetTag`
