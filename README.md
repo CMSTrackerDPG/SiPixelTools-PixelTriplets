@@ -46,11 +46,11 @@ Remarks:
 
 An example for a CRAB submit file is included. Change following lines:
  
--`config.General.requestName` 
--`config.Data.inputDataset` DAS path to file
--`config.Data.outputDatasetTag`
--`config.Data.outLFNDirBase` Path to output directory
--`config.Site.storageSite` If you have access to the PSI tier 3 this is `T3_CH_PSI`.
+- `config.General.requestName` 
+- `config.Data.inputDataset` DAS path to file
+- `config.Data.outputDatasetTag`
+- `config.Data.outLFNDirBase` Path to output directory
+- `config.Site.storageSite` If you have access to the PSI tier 3 this is `T3_CH_PSI`.
 
 In `pxl_BPIX_FPIX_genIBC.py` change the `process.GlobalTag`.
 
