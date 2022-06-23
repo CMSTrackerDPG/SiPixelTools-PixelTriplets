@@ -8,11 +8,11 @@ Measure hit resolution in BPix using the triplet method.
 Prepare your working directory with CMSSW
 
 ```
-export SCRAM_ARCH=slc7_amd64_gcc820
+export SCRAM_ARCH=slc7_amd64_gcc900
 cmsrel CMSSW_12_1_1
 cd CMSSW_12_1_1/src
 cmsenv
-git clone https://github.com/PascalBaertschi/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
+git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
 scram b -j 8
 cd SiPixelTools/PixelTriplets/
 ```
@@ -60,4 +60,4 @@ ATTENTION: At the moment the pt cut for BPix and FPix is set to 2 GeV. If this s
 
 ## Downstream code
 
-The plotting coe for FPix and BPix is [here](https://gitlab.cern.ch/pbaertsc/pixelresolution)
+The plotting code for FPix and BPix is [here](https://gitlab.cern.ch/pbaertsc/pixelresolution)
