@@ -1,10 +1,15 @@
+# Auto generated configuration file
+# using: 
+# Revision: 1.19 
+# Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
+# with command line options: RECO -s RAW2DIGI,L1Reco,RECO --data --scenario pp --conditions 123X_dataRun3_Express_v9 --era Run3 --process NTUPLE --eventcontent RECO --datatier RECO --filein /store/express/Run2022A/ExpressPhysics/FEVT/Express-v1/000/353/060/00000/22202638-77fc-41c1-91d1-aa0ff0c4c20a.root --python_filename=run_Resolution_ReReco_Data_cfg.py -n 10
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 
-from Configuration.StandardSequences.Eras import eras
+from Configuration.Eras.Era_Run3_cff import Run3
 
-process = cms.Process('NTUPLE',eras.Run3)
+process = cms.Process('NTUPLE',Run3)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -12,7 +17,7 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
@@ -26,13 +31,11 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-#options.inputFiles = ["/store/express/Run2022A/ExpressPhysics/FEVT/Express-v1/000/353/060/00000/22202638-77fc-41c1-91d1-aa0ff0c4c20a.root"]#only needed for running local
-#options.inputFiles = ["root://eoscms.cern.ch//eos/cms/store/data/Run2022A/SingleMuon/ALCARECO/SiPixelCalSingleMuonLoose-PromptReco-v1/000/353/060/00000/6a14e869-712c-4a37-826c-6986b3cd53f9.root"]
-options.inputFiles = ["root://eoscms.cern.ch//eos/cms/store/express/Run2022A/StreamExpress/ALCARECO/SiPixelCalSingleMuon-Express-v1/000/352/417/00000/e9bd6fa7-1099-456c-b5a2-859fc338103b.root"]
+options.inputFiles = ["/store/express/Run2022A/ExpressPhysics/FEVT/Express-v1/000/353/060/00000/22202638-77fc-41c1-91d1-aa0ff0c4c20a.root"]
 options.maxEvents = -1
 options.outputFile = "tree.root"
 options.parseArguments()
-#root://cms-xrd-global.cern.ch/
+
 
 # Input source
 process.source = cms.Source("PoolSource",
@@ -51,15 +54,12 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
-########## ACTIVATE THIS FOR RUNNING GEN+IBC METHOD ##########
-#process.PixelCPEGenericESProducer.IrradiationBiasCorrection = True # gen + IBC
-##############################################################
+
 process.RECOoutput = cms.OutputModule("PoolOutputModule",
     dataset = cms.untracked.PSet(
         dataTier = cms.untracked.string('RECO'),
         filterName = cms.untracked.string('')
     ),
-    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string('RECO_RAW2DIGI_L1Reco_RECO.root'),
     outputCommands = process.RECOEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -69,19 +69,8 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '120X_dataRun3_Prompt_Candidate_2021_11_22_18_14_35', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '120X_dataRun3_Express_v2', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '121X_mcRun3_2021_realistic_forpp900GeV_v6', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '121X_dataRun3_v13', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Express_v8', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Prompt_v8', '')
-"""
-process.GlobalTag.toGet = cms.VPSet(
-  cms.PSet(record = cms.string("TrackerAlignmentRcd"),
-           tag = cms.string("TrackerAlignment_EOY21_v1"),
-          )
-)
-"""
+process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Express_v9', '')
+
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
@@ -95,23 +84,16 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 
-# Insert resolution stuff here
-
-# Refitter
-
-#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonLoose'
-#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonLoose'
-process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
-process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
-#process.MeasurementTrackerEvent.pixelClusterProducer = 'siPixelClusters'
-#process.MeasurementTrackerEvent.stripClusterProducer = 'siStripClusters'
+#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+process.MeasurementTrackerEvent.pixelClusterProducer = 'siPixelClusters'
+process.MeasurementTrackerEvent.stripClusterProducer = 'siStripClusters'
 process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag()
 
 
-#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonLoose'
-process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
-#process.TrackRefitter.src = 'generalTracks'
+#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
+process.TrackRefitter.src = 'generalTracks'
 process.TrackRefitter.TrajectoryInEvent = True
 process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.MeasurementTrackerEvent * process.TrackRefitter)
 
@@ -131,9 +113,8 @@ process.hltFilter_step = cms.Path(process.HLTFilter)
 process.BPixResolution_Template = cms.EDAnalyzer('Pixel_BPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuonLoose')#generalTracks
-                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuon')#generalTracks
-                                                 #track_collection = cms.string('generalTracks'),
+                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuon')#generalTracks
+                                                 track_collection = cms.string('generalTracks'),
 )
 process.BPixResolution_Generic = process.BPixResolution_Template.clone(
     ttrhBuilder = cms.string('WithTrackAngle')
@@ -143,9 +124,8 @@ process.BPixResolution_Generic = process.BPixResolution_Template.clone(
 process.FPixResolution_Template = cms.EDAnalyzer('Pixel_FPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuonLoose'),#generalTracks
-                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),#generalTracks
-                                                 #track_collection=cms.string('generalTracks'),
+                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),#generalTracks
+                                                 track_collection=cms.string('generalTracks'),
                                                  doBPix = cms.bool(False),
                                                  doFPix = cms.bool(True)
 )
@@ -164,9 +144,9 @@ process.FPixResolution_step = cms.Path(process.FPixResolution_Template*process.F
 
 # Schedule definition
 process.schedule = cms.Schedule(
-    #process.raw2digi_step,
-    #process.L1Reco_step,
-    #process.reconstruction_step,
+    process.raw2digi_step,
+    process.L1Reco_step,
+    process.reconstruction_step,
     process.hltFilter_step,
     process.TrackRefitter_step,
     process.FPixResolution_step,
@@ -175,18 +155,13 @@ process.schedule = cms.Schedule(
 
 # end of insert to cmsDriver script
 
-#do not add changes to your config after this point (unless you know what you are doing)
-#from FWCore.ParameterSet.Utilities import convertToUnscheduled
-#process=convertToUnscheduled(process)
-
-
 # Customisation from command line
+
+#Have logErrorHarvester wait for the same EDProducers to finish as those providing data for the OutputModule
+from FWCore.Modules.logErrorHarvester_cff import customiseLogErrorHarvesterUsingOutputCommands
+process = customiseLogErrorHarvesterUsingOutputCommands(process)
 
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
 # End adding early deletion
-
-#processDumpFile = open('fullconfig.txt', 'w')
-#print (process.dumpPython(),file=processDumpFile)
-#processDumpFile.close()
