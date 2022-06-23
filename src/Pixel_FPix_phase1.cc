@@ -235,7 +235,11 @@ private:
   edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
   edm::EDGetTokenT <reco::TrackCollection>  t_generalTracks_;
   edm::EDGetTokenT< edm::View<reco::PFMET>> t_pfMet_;
-
+  edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> esTokenTTopo_;
+  edm::ESGetToken<TrajectoryFitter, TrajectoryFitter::Record> fitterToken_;
+  edm::ESGetToken<TransientTrackBuilder,TransientTrackRecord> theBToken_;
+  edm::ESGetToken<TransientTrackingRecHitBuilder,TransientRecHitRecord> hitBuilderToken_;
+  edm::ESGetToken<Propagator,TrackingComponentsRecord> propToken_;
   // ----------member data ---------------------------
   std::map<int, Histos> runmap;
 
@@ -389,6 +393,11 @@ Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
   doBPix=iConfig.getParameter<bool>("doBPix");
   doFPix=iConfig.getParameter<bool>("doFPix");
 
+  esTokenTTopo_ = esConsumes(),
+  fitterToken_ = esConsumes(edm::ESInputTag("","KFFittingSmootherWithOutliersRejectionAndRK")),
+  theBToken_ = esConsumes(edm::ESInputTag("","TransientTrackBuilder")),
+  hitBuilderToken_ = esConsumes(edm::ESInputTag("",_ttrhBuilder)),  
+  propToken_ = esConsumes(edm::ESInputTag("","PropagatorWithMaterial")),
   //std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
   //	   <<_triggerSrc.instance()<<" "<<std::endl;
 
@@ -870,10 +879,10 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   }
 
   //Retrieve tracker topology from geometry
-  edm::ESHandle<TrackerTopology> tTopoH;
-  iSetup.get<TrackerTopologyRcd>().get(tTopoH);
-  const TrackerTopology *tTopo=tTopoH.product();
-
+  //edm::ESHandle<TrackerTopology> tTopoH;
+  //iSetup.get<TrackerTopologyRcd>().get(tTopoH);
+  //const TrackerTopology *tTopo=tTopoH.product();
+  const TrackerTopology* const tTopo = &iSetup.getData(esTokenTTopo_);
   //--------------------------------------------------------------------
   // primary vertices:
   Handle<VertexCollection> vertices;
@@ -891,17 +900,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   //XYZPoint vtxN = XYZPoint(0,0,0);    // Not sure of the purpose for vtxN
   XYZPoint vtxP = XYZPoint(0,0,0);    //
   Vertex bestPvx;
-  
-  /*double xBS = 0;
-  double yBS = 0;
-  if( ibs ) {
-    xBS = bsP.x();
-    yBS = bsP.y();
-  }
-  else {
-    xBS = vtxP.x();
-    yBS = vtxP.y();
-    }*/
+
   
   //--------------------------------------------------------------------
   // MET:
@@ -919,21 +918,24 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 #ifdef NEW_TRACKINGRECHITS
 
   // Fitter                                                                                                                                                                         
-  edm::ESHandle<TrajectoryFitter> aFitter;
-  iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
+  //edm::ESHandle<TrajectoryFitter> aFitter;
+  //iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
+  auto const& aFitter = &iSetup.getData(fitterToken_);
   std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();         // pointer which destroys object when pointer out of scope
   
   //----------------------------------------------------------------------------                                                                                                                        
   // Transient Rechit Builders                                                                                                                                                                          
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
-  
+  //edm::ESHandle<TransientTrackBuilder> theB;
+  //iSetup.get<TransientTrackRecord>().get( "TransientTrackBuilder", theB );
+  auto const& theB = &iSetup.getData(theBToken_);
+
   // Transient rec hits:                                                                                                                                                                                
-  ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
-  iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
-  
+  //ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
+  //iSetup.get<TransientRecHitRecord>().get( _ttrhBuilder, hitBuilder );
+  auto const& hitBuilder = &iSetup.getData(hitBuilderToken_);
+
   // Cloner, New from 71Xpre7                                                                                                                                                                           
-  const TkTransientTrackingRecHitBuilder * builder = static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder.product());
+  const TkTransientTrackingRecHitBuilder * builder = static_cast<TkTransientTrackingRecHitBuilder const *>(hitBuilder);
   auto hitCloner = builder->cloner();
   theFitter->setHitCloner(&hitCloner);
 
@@ -953,9 +955,10 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 #endif
   //-------------------------------------------------------------------- 
   // Trackpropagator:
-  edm::ESHandle<Propagator> prop;
-  iSetup.get<TrackingComponentsRecord>().get( "PropagatorWithMaterial", prop );
-  const Propagator* thePropagator = prop.product();
+  //edm::ESHandle<Propagator> prop;
+  //iSetup.get<TrackingComponentsRecord>().get( "PropagatorWithMaterial", prop );
+  auto const& prop = &iSetup.getData(propToken_);
+  const Propagator* thePropagator = prop;
 
   //--------------------------------------------------------------------
   // tracks:
@@ -974,14 +977,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 
   h030->Fill( tracks->size() );
 
-  //----------------------------------------------------------------------------
-  // get tracker geometry:
-  edm::ESHandle<TrackerGeometry> pTG;
-  iSetup.get<TrackerDigiGeometryRecord>().get( pTG );
-  if( ! pTG.isValid() ) {
-    cout << "Unable to find TrackerDigiGeometry. Return\n";
-    return;
-  }
   
   //----------------------------------------------------------------------------
   // transient track builder, needs B-field from data base (global tag in .py)
@@ -1042,20 +1037,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     const reco::HitPattern& hp = iTrack->hitPattern();
     //double phi = iTrack->phi(); // Not used
     //double eta = iTrack->eta(); // ditto 
-    //if( idbg ) {
-    //  cout << endl;
-    //  cout << "Track "  << distance( tracks->begin(), iTrack );
-    //  cout << ": pt "   << iTrack->pt();
-    //  cout << ", eta "  << eta;
-    //  cout << ", phi "  << phi*wt;
-    //  cout << setprecision(1);
-    //  cout << ", dxyv " << iTrack->dxy(vtxP)*1E4 << " um";
-    //  cout << ", dzv "  << iTrack->dz(vtxP)*1E1 << " mm";
-    //  cout << setprecision(4);
-    //  cout << ", hits " << hp.numberOfHits(HitPattern::TRACK_HITS); 
-    //  cout << ", valid "<< hp.numberOfValidTrackerHits();
-    //  cout << endl;
-    //}
     
     h031->Fill( iTrack->charge() );
     h032->Fill( pt );
@@ -1075,54 +1056,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       h043->Fill( hp.trackerLayersWithMeasurement(), iTrack->normalizedChi2());
       h044->Fill( hp.trackerLayersWithMeasurement(), iTrack->ptError());
 
-    } 
-
-    //const double pi = 4*atan(1);
-    //const double wt = 180/pi;
-    //const double twopi = 2*pi;
-    //const double pihalf = 2*atan(1);
-    //const double sqrtpihalf = sqrt(pihalf);
-
-    //double phi = iTrack->phi();
-    //double dca = iTrack->d0(); // w.r.t. origin                                                                                                          
-    //double dca = -iTrack->dxy(); // dxy = -d0                                                                                                          
-    //double dip = iTrack->lambda();
-    //double z0  = iTrack->dz();
-    //double tet = pihalf - dip;
-    //double eta = iTrack->eta();                                                                                                                        
-
-    // beam line at z of track, taking beam tilt into account                                                                                            
-
-    //double zBeam = iTrack->dz(bsP);//z0p of track along beam line w.r.t. beam z center                                                                   
-    //double xBeam = rbs->x0() + rbs->dxdz() * zBeam;//beam at z of track                                                                                  
-    //double yBeam = rbs->y0() + rbs->dydz() * zBeam;
-    //double z0p =  zBeam + bsP.z(); // z0p of track along beam line w.r.t. CMS z = 0                                                                      
-    //XYZPoint blP = XYZPoint( xBeam, yBeam, z0p );//point on beam line at z of track                                                                      
-    
-    //xBS = xBeam;//improve                                                                                                                                
-    // yBS = yBeam;//beam tilt taken into account                                                                                                           
-
-    //double bcap = iTrack->dxy(blP);//impact parameter to beam                                                                                            
-    //double edca = iTrack->dxyError();
-    //double ebca = sqrt( edca*edca + bx*by );//round beam                                                                                                 
-    //double sbca = bcap / ebca;//impact parameter significance                                                                                            
-
-    // if( hp.hasValidHitInFirstPixelBarrel() &&                                                                                                         
-    //        hp.trackerLayersWithMeasurement() > 7 ) {                                                                                                  
-    /*if( hp.hasValidHitInPixelLayer(PixelSubdetector::PixelEndcap,2) && hp.trackerLayersWithMeasurement() > 7 ) {
-      if( pt > 4 ) {
-	h040->Fill( bcap*1E4 );//26 um in Oct 2011, 21 um Apr 2012                                                                                       
-	h041->Fill( edca*1E4 );
-	h042->Fill( sbca );//1.02 in 2011 reReco                                                                                                         
-      }
-
-      h043->Fill( logpt, ebca*1E4 );
-      if( abs(sbca) < 5 ) {
-      h044->Fill( logpt, sqrtpihalf*abs(bcap)*1E4 );
-      //	h045->Fill( logpt, sqrtpihalf*abs(sbca) );
-      }
-    }//long tracks
-    */
+    }
     TrackerLayersWithMeasurements.push_back(hp.trackerLayersWithMeasurement());
     if( hp.trackerLayersWithMeasurement() < 7 ){
       pt_lowlayerswithmeasurements.push_back(pt);
@@ -2618,11 +2552,6 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   }// loop over tracks
   tree->Fill();
 
-  //cout << "numberOfTracksCount = " <<numberOfTracksCount << endl;
-  //cout << "numberOfTracksCount123 = " <<numberOfTracksCount123 << endl;
-  //cout << "numberOfTracksCount124 = " <<numberOfTracksCount123 << endl;
-  //cout << "numberOfTracksCount234 = " <<numberOfTracksCount123 << endl;
-  //cout << "numberOfTracksCount134 = " <<numberOfTracksCount123 << endl;
 
 }//event
 //----------------------------------------------------------------------
