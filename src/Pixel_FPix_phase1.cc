@@ -1047,8 +1047,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     h037->Fill( hp.trackerLayersWithMeasurement() );
     h038->Fill( hp.pixelBarrelLayersWithMeasurement() );
     h039->Fill( hp.pixelEndcapLayersWithMeasurement() );
-    //CUSTOM was pt>4
-    if(pt>2)     {
+    //CUSTOM FPIX pt cut
+    if(pt>4)     {
       h037_1->Fill( hp.trackerLayersWithMeasurement() );
       h040->Fill( iTrack->normalizedChi2());
       h041->Fill( iTrack->ptError());
@@ -1062,7 +1062,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       pt_lowlayerswithmeasurements.push_back(pt);
     };
     if( hp.trackerLayersWithMeasurement() < 7 ) continue;
-    //CUSTOM was < 7
+    
     pt_highlayerswithmeasurements.push_back(pt);
     // transient track:    
     TransientTrack tTrack = theB->build(*iTrack);
@@ -1899,8 +1899,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             numberOfTracksCount123++;
           }
 	  //pt_12_tracks.push_back(pt);
-	  //CUSTOM was pt>4
-	  if(pt>2){
+	  //CUSTOM FPIX pt cut
+	  if(pt>4){
 	    pt_4_tracks.push_back(pt);
 	    dx_res_1 = residual_x_2;
 	    dz_res_1 = residual_y_2;
@@ -1953,8 +1953,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM was pt>12
-	  if(pt>2){	  
+	  //CUSTOM BPIX pt cut
+	  if(pt>12){	  
 	    //pt_12_tracks.push_back(pt);
 	    h420b1_123->Fill( residual_x_1 );
 	    h421b1_123->Fill( residual_y_1 );
@@ -2063,8 +2063,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount124++;
 	  }
-          //CUSTOM was pt>4
-	  if(pt>2){
+          //CUSTOM FPIX pt cut
+	  if(pt>4){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2102,8 +2102,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM was pt>12
-	  if(pt>2){	  
+	  //CUSTOM BPIX pt cut
+	  if(pt>12){	  
 	    
 	    h420b1_124->Fill( residual_x_1 );
 	    h421b1_124->Fill( residual_y_1 );
@@ -2211,8 +2211,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount134++;
 	  }
-          //CUSTOM was pt>4
-	  if(pt>2){
+          //CUSTOM FPIX pt cut
+	  if(pt>4){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2250,8 +2250,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM was pt>12
-	  if(pt>2){	  
+	  //CUSTOM BPIX pt cut
+	  if(pt>12){	  
 	    
 	    h420b1_134->Fill( residual_x_1 );
 	    h421b1_134->Fill( residual_y_1 );
@@ -2422,8 +2422,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount234++;
           }
-	  //CUSTOM was pt>4
-	  if(pt>2){
+	  //CUSTOM FPIX pt cut
+	  if(pt>4){
 
 	    dx_res_2 = residual_x_3;
 	    dz_res_2 = residual_y_3;
@@ -2494,8 +2494,8 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM was pt>12
-	  if(pt>2){	  
+	  //CUSTOM BPIX pt cut
+	  if(pt>12){	  
 	    
 	    h420b2_234->Fill( residual_x_2 );
 	    h421b2_234->Fill( residual_y_2 );

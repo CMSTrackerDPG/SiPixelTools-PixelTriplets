@@ -9,8 +9,8 @@ Prepare your working directory with CMSSW
 
 ```
 export SCRAM_ARCH=slc7_amd64_gcc900
-cmsrel CMSSW_12_1_1
-cd CMSSW_12_1_1/src
+cmsrel CMSSW_12_4_10
+cd CMSSW_12_4_10/src
 cmsenv
 git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
 scram b -j 8
@@ -54,7 +54,6 @@ An example for a CRAB submit file is included. Change following lines:
 
 In `pxl_BPIX_FPIX_genIBC.py` change the `process.GlobalTag`.
 
-ATTENTION: At the moment the pt cut for BPix and FPix is set to 2 GeV. If this should be changed this has to be done in the `Pixel_BPix_phase1.cc` and `Pixel_FPix_phase1.cc`.
 
 
 
