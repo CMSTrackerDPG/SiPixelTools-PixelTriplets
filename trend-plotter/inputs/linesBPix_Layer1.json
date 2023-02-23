@@ -1,0 +1,35 @@
+{
+    "HV_change": {
+        "line": {
+            "title": "HV change",
+            "style": "kDashed",
+            "color": "kGray+1"
+        },
+        "runs":["358156","359014","361514","362520"]
+    },
+    "calibration_change": {
+        "line": {
+            "title": "CPE calibration change",
+            "style": "kDotted",
+            "color": "kGray+1"
+        },
+        "runs": ["358156","359014","360178","361514","362520"]
+    },
+    "gain_change": {
+        "line": {
+            "title": "Gain change",
+            "style": "kDashDotted",
+            "color": "kGray+1"
+        },
+        "runs": ["359211","359946"]
+    },
+    "years": {
+        "line": {
+            "style": "kSolid",
+            "color": "kBlack",
+            "width": "1"
+        },
+        "runs": ["355100"],
+        "labels": ["2022"]
+    }
+}

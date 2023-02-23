@@ -1,0 +1,19 @@
+{
+        "gain_change": {
+        "line": {
+            "title": "Gain change",
+            "style": "kDashDotted",
+            "color": "kGray+1"
+        },
+        "runs": ["359211","359946"]
+    },
+    "years": {
+        "line": {
+            "style": "kSolid",
+            "color": "kBlack",
+            "width": "1"
+        },
+        "runs": ["355100"],
+        "labels": ["2022"]
+    }
+}
