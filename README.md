@@ -2,7 +2,7 @@ Tutorial for producing pixel resolution plots
 
 ## PixelTriplet code
 
-The PixelTriplet code (https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets) will be used. It requires CMSSW, you can follow the setup:
+CMSSW is required to run the PixelTriplet code, you can follow the setup:
 ```
 export SCRAM_ARCH=slc7_amd64_gcc900
 cmsrel CMSSW_12_4_10
@@ -10,7 +10,7 @@ cd CMSSW_12_4_10/src
 cmsenv
 git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools-PixelTriplets
 cd SiPixelTools-PixelTriplets/
-git checkout -b Tutorial remotes/origin/Tutorial
+git checkout -b TrackerTraining remotes/origin/TrackerTraining
 scram b -j 8
 ```
 
@@ -48,7 +48,7 @@ Insert the regions and fit types in the ``runFits.py`` code. Because the root fi
 ```
 python runFits.py --input . --run 361512
 ```
-The code will plot the fits with the residual printed as label for all the layers of the barrel and all the disk of the forward detector. The fits are done separatelly for the two different reconstruction algorithms.
+The code will plot the fits with the residual printed as label for all the layers of the barrel and all the disk of the forward tracker detector. The fits are done separately for the two different reconstruction algorithms.
 
 ## Producing trend plots
 The trend plots don't need CMSSW. In a clean shell source LCG:
