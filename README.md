@@ -13,7 +13,9 @@ cd SiPixelTools-PixelTriplets/
 git checkout -b TrackerTraining remotes/origin/TrackerTraining
 scram b -j 8
 ```
-The main code is ``pxl_BPIX_FPIX_genIBC.py`` which uses the ``Pixel_FPix_phase1.cc`` and ``Pixel_BPix_phase1.cc`` files in the ``src`` folder. The Triplet method uses tracks with pt>12 GeV for the barrel and pt>4 GeV for the forwards disk with at least 3 hits in the barrel layers/disks. Then the code predicts the position in one layer/disk with the hits from two other layers/disks. There are two reconstruction methods. The generic method is a simple method based on the track angle and position. The template method is based on detailed cluster shape simulations. The difference from the predicted to the actual hit gives the residual distribution, which is fitted by a student t-fit. The width of this fit gives the pixel resolution.
+The main code is ``pxl_BPIX_FPIX_genIBC.py`` which uses the ``Pixel_FPix_phase1.cc`` and ``Pixel_BPix_phase1.cc`` files in the ``src`` folder. 
+
+The Triplet method uses tracks with pt>12 GeV for the barrel and pt>4 GeV for the forwards disk with at least 3 hits in the barrel layers/disks. Then the code predicts the position in one layer/disk with the hits from two other layers/disks. There are two reconstruction methods. The generic method is a simple method based on the track angle and position. The template method is based on detailed cluster shape simulations. The difference from the predicted to the actual hit gives the residual distribution.
 
 First we will run the code locally. We are going to use the Muon dataset from Run2022F (``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO``). Add ``root://eoscms.cern.ch///eos/cms/store/data/Run2022F/Muon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/361/512/00000/010e377e-2f80-46b8-9397-5b5bfe7629aa.root`` to ``options.inputFiles`` in ``pxl_BPIX_FPIX_genIBC.py``.
 
@@ -46,9 +48,13 @@ The fit plots don't need CMSSW. In a clean shell source LCG:
 ```
 source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc10-opt/setup.sh
 ```
+
 Switch to the ``single_run`` directory.
+
 The output files from the PixelTriplet code are required. An example run from Run3 is provided for the exercise (``361512.root``).
-FitAndPlot.C fits the distributions with a student t-fit and produces the pixel resolution plots. There is a python wrapper available for easier use, ``runFits.py``. It takes as input the folder where the root files with the runs are stored. If you only wish to process one run also give the run number, otherwise the code is run on all runs in the input folder and stores the results in json files which can later be used to produce trend plots.
+
+FitAndPlot.C fits the residual distributions with a student t-fit and produces the pixel resolution plots. The resolution is written as a label on the plots. There is a python wrapper available for easier use, ``runFits.py``. It takes as input the folder where the root files with the runs are stored. If you only wish to process one run also give the run number, otherwise the code is run on all runs in the input folder and stores the results in json files which can later be used to produce trend plots.
+
 Insert the regions and fit types in the ``runFits.py`` code at L83 and L84. Because the root file is saved in the same directory as the code you can simply run:
 
 ```
@@ -61,8 +67,12 @@ The trend plots don't need CMSSW. In a clean shell source LCG:
 ```
 source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc10-opt/setup.sh
 ```
+
 Switch to the ``trend-plotter`` directory.
-In order to produce trend plots the fit code from the previous exercise must be run on all runs from the time range which should be shown in the trend plots. An example from Run3 with the points merged with bins of 0.5 finv is provided in trend-plotter/inputs. In the same directory are also json files with runs where the HV, the calibration or the gain was changed. These changes have an impact on the pixel resolution and are therefore visualized as lines in the plots.
+
+In order to produce trend plots the fit code from the previous exercise must be run on all runs from the time range which should be shown in the trend plots. An example from Run3 with the points merged with bins of 0.5 finv is provided in trend-plotter/inputs. 
+
+In the same directory are also json files with runs where the HV, the calibration or the gain was changed. These changes have an impact on the pixel resolution and are therefore visualized as lines in the plots.
 
 The trend plotter (https://gitlab.cern.ch/paconnor/trend-plotter) is used. First compile libTrend:
 
