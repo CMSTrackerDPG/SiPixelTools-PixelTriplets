@@ -13,14 +13,19 @@ cd SiPixelTools-PixelTriplets/
 git checkout -b TrackerTraining remotes/origin/TrackerTraining
 scram b -j 8
 ```
+The main code is ``pxl_BPIX_FPIX_genIBC.py`` which uses the ``Pixel_FPix_phase1.cc`` and ``Pixel_BPix_phase1.cc`` files in the ``src`` folder. The Triplet method uses tracks with pt>12 GeV for the barrel and pt>4 GeV for the forwards disk with at least 3 hits in the barrel layers/disks. Then the code predicts the position in one layer/disk with the hits from two other layers/disks. There are two reconstruction methods. The generic method is a simple method based on the track angle and position. The template method is based on detailed cluster shape simulations. The difference from the predicted to the actual hit gives the residual distribution, which is fitted by a student t-fit. The width of this fit gives the pixel resolution.
+
+First we will run the code locally. We are going to use the Muon dataset from Run2022F (``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO``). Add ``root://eoscms.cern.ch///eos/cms/store/data/Run2022F/Muon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/361/512/00000/010e377e-2f80-46b8-9397-5b5bfe7629aa.root`` to ``options.inputFiles`` in ``pxl_BPIX_FPIX_genIBC.py``.
+
+If you check the config of the production in the Data Aggregation System (https://cmsweb.cern.ch/das) you see that the global tag used was ``124X_dataRun3_Prompt_v4``. Changed this at ``process.GlobalTag``.
 
 You can run the code localy with cmsRun:
 ```
 cmsRun pxl_BPIX_FPIX_genIBC.py
 ```
-In the code you can change ``inputFiles`` and ``outputFile``. Use ``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO`` for this exercise. If you check the config of the production you see that the global tag used was ``124X_dataRun3_Prompt_v4``. Changed this is in the ``pxl_BPIX_FPIX_genIBC.py`` code. One example root file to test locally would be  ``root://eoscms.cern.ch///eos/cms/store/data/Run2022F/Muon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/361/512/00000/010e377e-2f80-46b8-9397-5b5bfe7629aa.root``. As default the number of events is restricted to 2000, if you want to run on more events you can change ``options.maxEvents`` in ``pxl_BPIX_FPIX_genIBC.py``.
+As default the number of events is restricted to 2000, if you want to run on more events you can change ``options.maxEvents``.
 
-The code is best run with CRAB. An example for a CRAB submit file is included (``crab_submit.py``). Change the following lines:
+The code is best run with CRAB (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideCrab). An example for a CRAB submit file is included (``crab_submit.py``). Change the following lines:
 ```
 config.General.requestName
 config.JobType.psetName
@@ -30,8 +35,9 @@ config.Data.lumiMask
 config.Data.outLFNDirBase
 config.Site.storageSite
 ```
+
 As input dataset you can use: ``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO``. ``storageSite`` needs the tier3 you have access to. As lumiMask you can use the ``Cert_Collisions2022_355100_361580_Golden.json`` which is provided.
-Because running CRAB jobs is not feasible in this tutorial an example output file is provided.
+Because running CRAB jobs is not feasible in this tutorial an example output file is provided in the ``single_run`` directory.
 
 
 ## Producing pixel resolution plots for single run
@@ -43,7 +49,7 @@ source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc10-opt/setup.sh
 Switch to the ``single_run`` directory.
 The output files from the PixelTriplet code are required. An example run from Run3 is provided for the exercise (``361512.root``).
 FitAndPlot.C fits the distributions with a student t-fit and produces the pixel resolution plots. There is a python wrapper available for easier use, ``runFits.py``. It takes as input the folder where the root files with the runs are stored. If you only wish to process one run also give the run number, otherwise the code is run on all runs in the input folder and stores the results in json files which can later be used to produce trend plots.
-Insert the regions and fit types in the ``runFits.py`` code. Because the root file is saved in the same directory as the code you can simply run:
+Insert the regions and fit types in the ``runFits.py`` code at L83 and L84. Because the root file is saved in the same directory as the code you can simply run:
 
 ```
 python runFits.py --input . --run 361512

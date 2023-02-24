@@ -26,9 +26,9 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-#options.inputFiles = []
+options.inputFiles = ['ADD_INPUT_ROOTFILE']
 options.maxEvents = 2000
-#options.outputFile = "tree.root"
+options.outputFile = "PixelTriplet_output.root"
 options.parseArguments()
 
 # Input source
