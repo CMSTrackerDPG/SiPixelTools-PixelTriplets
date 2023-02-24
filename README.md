@@ -28,6 +28,7 @@ cmsRun pxl_BPIX_FPIX_genIBC.py
 As default the number of events is restricted to 2000, if you want to run on more events you can change ``options.maxEvents``.
 
 The code is best run with CRAB (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideCrab). An example for a CRAB submit file is included (``crab_submit.py``). Change the following lines:
+
 ```
 config.General.requestName
 config.JobType.psetName
@@ -37,8 +38,7 @@ config.Data.lumiMask
 config.Data.outLFNDirBase
 config.Site.storageSite
 ```
-
-As input dataset you can use: ``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO``. ``storageSite`` needs the tier3 you have access to. As lumiMask you can use the ``Cert_Collisions2022_355100_361580_Golden.json`` which is provided.
+``requestName`` is the name for the CRAB job, ``psetName`` is the code to run, which in our case is ``pxl_BPIX_FPIX_genIBC.py``, as input dataset you can use ``/Muon/Run2022F-SiPixelCalSingleMuonTight-PromptReco-v1/ALCARECO``, ``outputDatasetTag`` is the name of the output, as lumiMask you can use the ``Cert_Collisions2022_355100_361580_Golden.json`` which is provided, ``outLFNDirBase`` is the path to the directory where you want the output to be stored and  ``storageSite`` needs the tier3 you have access to.
 Because running CRAB jobs is not feasible in this tutorial an example output file is provided in the ``single_run`` directory.
 
 
@@ -103,5 +103,5 @@ brilcalc lumi --amodetag PROTPHYS -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-l
 The ``stable2022.csv`` file is also provided. In order to get a more suitable format ``skimLumiFile.py`` can be used:
 
 ``
-python skimLumiFile.py --inputFiles stable2022.csv --outputFile deliveredLumiRun3.txt`--lumiType delivered
+python skimLumiFile.py --inputFiles stable2022.csv --outputFile `deliveredLumiRun3.txt`--lumiType delivered
 ``
