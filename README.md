@@ -8,9 +8,8 @@ export SCRAM_ARCH=slc7_amd64_gcc900
 cmsrel CMSSW_12_4_10
 cd CMSSW_12_4_10/src
 cmsenv
-git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools-PixelTriplets
+git clone -b TrackerTraining https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools-PixelTriplets
 cd SiPixelTools-PixelTriplets/
-git checkout -b TrackerTraining remotes/origin/TrackerTraining
 scram b -j 8
 ```
 The main code is ``pxl_BPIX_FPIX_genIBC.py`` which uses the ``Pixel_FPix_phase1.cc`` and ``Pixel_BPix_phase1.cc`` files in the ``src`` folder. 
