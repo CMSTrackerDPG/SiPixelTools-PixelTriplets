@@ -144,7 +144,7 @@ process.schedule = cms.Schedule(
     #process.raw2digi_step,
     #process.L1Reco_step,
     #process.reconstruction_step,
-    process.hltFilter_step,
+    #process.hltFilter_step,
     process.TrackRefitter_step,
     process.FPixResolution_step,
     process.BPixResolution_step

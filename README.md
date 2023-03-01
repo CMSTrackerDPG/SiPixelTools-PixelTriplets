@@ -8,9 +8,9 @@ export SCRAM_ARCH=slc7_amd64_gcc900
 cmsrel CMSSW_12_4_10
 cd CMSSW_12_4_10/src
 cmsenv
-git clone -b TrackerTraining https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools-PixelTriplets
-cd SiPixelTools-PixelTriplets/
+git clone -b TrackerTraining https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
 scram b -j 8
+cd SiPixelTools/PixelTriplets/
 ```
 The main code is ``pxl_BPIX_FPIX_genIBC.py`` which uses the ``Pixel_FPix_phase1.cc`` and ``Pixel_BPix_phase1.cc`` files in the ``src`` folder. 
 
@@ -94,7 +94,10 @@ Then the trend plots for FPIX or BPIX can be run with:
 
 optional exercise:
 
-For the trend plots the lumi per run is required. First one needs to get the luminosity of all 2022 runs using brilcalc. If you are not familiar with brilcalc follow the setup here: https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html
+For the trend plots the lumi per run is required. First one needs to get the luminosity of all 2022 runs using brilcalc. If you are not familiar with brilcalc follow the setup here: https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html. You could use brilcalc with a docker with:
+```
+source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
+```
 
 ```
 brilcalc lumi --amodetag PROTPHYS -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json --begin "01/01/22 00:00:00" --end "12/31/22 23:59:59" --output-style csv > stable2022.csv
@@ -102,5 +105,5 @@ brilcalc lumi --amodetag PROTPHYS -u /fb --normtag /cvmfs/cms-bril.cern.ch/cms-l
 The ``stable2022.csv`` file is also provided. In order to get a more suitable format ``skimLumiFile.py`` can be used:
 
 ``
-python skimLumiFile.py --inputFiles stable2022.csv --outputFile `deliveredLumiRun3.txt`--lumiType delivered
+python3 skimLumiFile.py --inputFiles stable2022.csv --outputFile deliveredLumiRun3.txt --lumiType delivered
 ``
