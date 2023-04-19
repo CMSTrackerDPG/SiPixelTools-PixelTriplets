@@ -26,8 +26,8 @@
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-
 #include "FWCore/Framework/interface/Event.h"
 #include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -712,11 +712,12 @@ struct Histos{
 };
 } // namespace
 
+//class Pixel_BPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 class Pixel_BPix_phase1 : public edm::EDAnalyzer, public Histos {
 
 public:
   explicit Pixel_BPix_phase1(const edm::ParameterSet&// ,edm::ConsumesCollector&&
-	       );
+			     );
   ~Pixel_BPix_phase1();
 
 private:
@@ -3207,8 +3208,8 @@ void Pixel_BPix_phase1::beginJob()
 
 void Pixel_BPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
+        //usesResource("TFileService");
 	const int run = iRun.run();
-
 	std::map<int, Histos>::iterator iter = runmap.find(run);
 	if(iter != runmap.end())
 	{

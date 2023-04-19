@@ -32,6 +32,8 @@ options = VarParsing.VarParsing ('analysis')
 #options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/data/Run2022C/Muon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/356/530/00000/a645e716-b4cc-427b-b404-e4b3296db733.root"]
 #options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/express/Run2022F/StreamExpress/ALCARECO/SiPixelCalSingleMuon-Express-v1/000/360/413/00000/dda19093-9a59-44f5-b184-65e07dbce1c1.root"]
 #options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/data/Run2022B/SingleMuon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/355/374/00000/90618843-618c-4a4a-9b2d-489c664f3916.root"]
+#options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/data/Run2022B/SingleMuon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/355/374/00000/90618843-618c-4a4a-9b2d-489c664f3916.root"]
+options.inputFiles = ["root://eoscms.cern.ch//eos/cms/store/express/Run2023A/StreamExpress/ALCARECO/SiPixelCalSingleMuonTight-Express-v1/000/365/835/00000/c51627cb-8265-4225-98cc-ba0b57c80e84.root"]
 options.maxEvents = -1
 options.outputFile = "tree.root"
 options.parseArguments()
@@ -72,10 +74,8 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Prompt_v12', '') #Run2022B
-#process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Express_v10', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v4', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Express_v1', '')
 """
 process.GlobalTag.toGet = cms.VPSet(
   cms.PSet(record = cms.string("TrackerAlignmentRcd"),

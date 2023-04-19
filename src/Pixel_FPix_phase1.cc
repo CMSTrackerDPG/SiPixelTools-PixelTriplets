@@ -28,6 +28,7 @@
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -162,6 +163,16 @@ struct Histos{
   void InitFPix_phase1(TFileDirectory* fs);
 };
 
+class myCountersPixel_FPix_phase1{
+   public:
+      static int neve;
+      static unsigned int prevrun;
+};
+
+int myCountersPixel_FPix_phase1::neve = 0;
+unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
+
+//class Pixel_FPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 class Pixel_FPix_phase1 : public edm::EDAnalyzer, public Histos {
 public:
   explicit Pixel_FPix_phase1(const edm::ParameterSet&);
@@ -375,18 +386,19 @@ private:
 
 };
 
-class myCountersPixel_FPix_phase1{
-   public:
-      static int neve;
-      static unsigned int prevrun;
-};
+//class myCountersPixel_FPix_phase1{
+//   public:
+//      static int neve;
+//      static unsigned int prevrun;
+//};
 
-int myCountersPixel_FPix_phase1::neve = 0;
-unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
+//int myCountersPixel_FPix_phase1::neve = 0;
+//unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
 
 
 Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
 {
+  //usesResource("TFileService");
   std::cout << "PxlFPix constructed\n";
   _triggerSrc = iConfig.getParameter<edm::InputTag>("triggerSource");
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
@@ -407,7 +419,6 @@ Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
   t_generalTracks_= consumes<reco::TrackCollection> (edm::InputTag(_track_collection));
   
   t_pfMet_= consumes< edm::View<reco::PFMET>>(edm::InputTag("pfMet"));
-  
   edm::Service<TFileService> fsT;
   tree = fsT->make<TTree>("tree", "tree");
   tree->Branch("number_of_tracks", &number_of_tracks);
@@ -682,7 +693,7 @@ void Pixel_FPix_phase1::beginJob()
 
 void Pixel_FPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-
+  //usesResource("TFileService");
   const int run = iRun.run();
 
   std::map<int, Histos>::iterator iter = runmap.find(run);
