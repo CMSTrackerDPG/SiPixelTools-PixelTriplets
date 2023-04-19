@@ -28,8 +28,7 @@
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include <FWCore/Framework/interface/EventSetup.h>
@@ -172,17 +171,17 @@ class myCountersPixel_FPix_phase1{
 int myCountersPixel_FPix_phase1::neve = 0;
 unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
 
-//class Pixel_FPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
-class Pixel_FPix_phase1 : public edm::EDAnalyzer, public Histos {
+class Pixel_FPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 public:
   explicit Pixel_FPix_phase1(const edm::ParameterSet&);
   ~Pixel_FPix_phase1();
 
 private:
-  virtual void beginJob() ;
-  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
+  virtual void beginJob() override;
+  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+  virtual void endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override {}
+  virtual void endJob() override;
   void getResiduals(const edm::Event&, const edm::EventSetup&, std::string detTag);
   std::vector<double> getIntersection(std::vector<double> p1, std::vector<double> p2, double rho, const GeomDet *detHit, std::vector<double> intersection);
 
@@ -398,7 +397,7 @@ private:
 
 Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
 {
-  //usesResource("TFileService");
+  usesResource("TFileService");
   std::cout << "PxlFPix constructed\n";
   _triggerSrc = iConfig.getParameter<edm::InputTag>("triggerSource");
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
@@ -693,7 +692,6 @@ void Pixel_FPix_phase1::beginJob()
 
 void Pixel_FPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-  //usesResource("TFileService");
   const int run = iRun.run();
 
   std::map<int, Histos>::iterator iter = runmap.find(run);
