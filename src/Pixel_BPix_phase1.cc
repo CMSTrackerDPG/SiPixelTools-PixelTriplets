@@ -26,8 +26,7 @@
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -712,8 +711,7 @@ struct Histos{
 };
 } // namespace
 
-//class Pixel_BPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
-class Pixel_BPix_phase1 : public edm::EDAnalyzer, public Histos {
+class Pixel_BPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 
 public:
   explicit Pixel_BPix_phase1(const edm::ParameterSet&// ,edm::ConsumesCollector&&
@@ -721,11 +719,12 @@ public:
   ~Pixel_BPix_phase1();
 
 private:
-  virtual void beginJob() ;
-  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
+  virtual void beginJob() override;
+  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&// ,edm::ConsumesCollector&&
-		       );
-  virtual void endJob() ;
+		       ) override;
+  virtual void endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override {}
+  virtual void endJob() override;
 
   edm::InputTag _triggerSrc;
   std::string _ttrhBuilder;
@@ -788,6 +787,8 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   // _OC_beginning=iConfig.getParameter<int>("orbit_beginning");
   // _OC_end=iConfig.getParameter<int>("orbit_end");
   // tok_caloHH_ = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
+  
+  usesResource("TFileService");
 }
 //
 // destructor:
@@ -3208,7 +3209,6 @@ void Pixel_BPix_phase1::beginJob()
 
 void Pixel_BPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-        //usesResource("TFileService");
 	const int run = iRun.run();
 	std::map<int, Histos>::iterator iter = runmap.find(run);
 	if(iter != runmap.end())
