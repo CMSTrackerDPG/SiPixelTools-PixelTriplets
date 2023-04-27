@@ -9,10 +9,10 @@ Prepare your working directory with CMSSW
 
 ```
 export SCRAM_ARCH=slc7_amd64_gcc900
-cmsrel CMSSW_12_4_10
-cd CMSSW_12_4_10/src
+cmsrel CMSSW_13_0_0
+cd CMSSW_13_0_0/src
 cmsenv
-git clone https://github.com/CMSTrackerDPG/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
+git clone -b Upgrade git@github.com:PascalBaertschi/SiPixelTools-PixelTriplets.git SiPixelTools/PixelTriplets
 scram b -j 8
 cd SiPixelTools/PixelTriplets/
 ```
