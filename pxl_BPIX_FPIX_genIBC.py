@@ -26,12 +26,7 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-#options.inputFiles = ["root://eoscms.cern.ch//eos/cms/store/data/Run2022C/SingleMuon/ALCARECO/SiPixelCalSingleMuonLoose-PromptReco-v1/000/355/872/00000/7a619d21-4971-4e9a-9fc4-96078365e61e.root"]
-#options.inputFiles = ["root://eoscms.cern.ch//eos/cms/store/data/Run2022B/SingleMuon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/355/110/00000/2d323365-c53c-4ce6-94a1-3a8cf5728860.root"]
-#options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/express/Run2022B/ExpressPhysics/FEVT/Express-v1/000/355/130/00000/83ce3203-5b8f-478e-b637-d80f91ba9b30.root"]
-#options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/data/Run2022C/Muon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/356/530/00000/a645e716-b4cc-427b-b404-e4b3296db733.root"]
-#options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/express/Run2022F/StreamExpress/ALCARECO/SiPixelCalSingleMuon-Express-v1/000/360/413/00000/dda19093-9a59-44f5-b184-65e07dbce1c1.root"]
-#options.inputFiles = ["root://eoscms.cern.ch///eos/cms/store/data/Run2022B/SingleMuon/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/355/374/00000/90618843-618c-4a4a-9b2d-489c664f3916.root"]
+#options.inputFiles = []
 options.maxEvents = -1
 options.outputFile = "tree.root"
 options.parseArguments()
@@ -72,10 +67,7 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Prompt_v12', '') #Run2022B
-#process.GlobalTag = GlobalTag(process.GlobalTag, '123X_dataRun3_Express_v10', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v4', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Express_v2', '')
 """
 process.GlobalTag.toGet = cms.VPSet(
   cms.PSet(record = cms.string("TrackerAlignmentRcd"),
@@ -100,21 +92,17 @@ associatePatAlgosToolsTask(process)
 
 # Refitter
 
-process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
-process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
-#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonLoose'
-#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonLoose'
-#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
-#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
+#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
+process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
 #process.MeasurementTrackerEvent.pixelClusterProducer = 'siPixelClusters'
 #process.MeasurementTrackerEvent.stripClusterProducer = 'siStripClusters'
 process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag()
 
-
-process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonTight'
-#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonLoose'
-#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
+#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonTight'
+process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
 #process.TrackRefitter.src = 'generalTracks'
 process.TrackRefitter.TrajectoryInEvent = True
 process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.MeasurementTrackerEvent * process.TrackRefitter)
@@ -135,28 +123,34 @@ process.hltFilter_step = cms.Path(process.HLTFilter)
 process.BPixResolution_Template = cms.EDAnalyzer('Pixel_BPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuonTight'),
-                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuonLoose'),
-                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuon'),
+                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuonTight'),
+                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuon'),
                                                  #track_collection = cms.string('generalTracks'),
+                                                 Template = cms.bool(True),
+                                                 Generic = cms.bool(False)
 )
 process.BPixResolution_Generic = process.BPixResolution_Template.clone(
-    ttrhBuilder = cms.string('WithTrackAngle')
+    ttrhBuilder = cms.string('WithTrackAngle'),
+    Template = cms.bool(False),
+    Generic = cms.bool(True)
 )
 
 # FPix Resolution
 process.FPixResolution_Template = cms.EDAnalyzer('Pixel_FPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuonTight'),
-                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuonLoose'),
-                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),
+                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuonTight'),
+                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),
                                                  #track_collection=cms.string('generalTracks'),
                                                  doBPix = cms.bool(False),
-                                                 doFPix = cms.bool(True)
+                                                 doFPix = cms.bool(True),
+                                                 Template = cms.bool(True),
+                                                 Generic = cms.bool(False)
 )
 process.FPixResolution_Generic = process.FPixResolution_Template.clone(
-    ttrhBuilder = cms.string('WithTrackAngle')
+    ttrhBuilder = cms.string('WithTrackAngle'),
+    Template = cms.bool(False),
+    Generic = cms.bool(True)
 )
 
 # TFileService used for both BPix/FPix resolution

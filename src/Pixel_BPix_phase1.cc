@@ -26,8 +26,7 @@
 // CMS and user include files:
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include <FWCore/Framework/interface/EventSetup.h>
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -119,14 +118,24 @@
 //
 namespace {
 
-class myCounters{
+class Counter_Template{
+public:
+  static int neve;
+  static unsigned int prevrun;
+};
+class Counter_Generic{
 public:
   static int neve;
   static unsigned int prevrun;
 };
 
-int myCounters::neve = 0;
-unsigned int myCounters::prevrun = 0;
+float BPIX_ptcut = 12.;
+float FPIX_ptcut = 4.;
+
+int Counter_Template::neve = 0;
+unsigned int Counter_Template::prevrun = 0;
+int Counter_Generic::neve = 0;
+unsigned int Counter_Generic::prevrun = 0;
 //
 
 struct Histos{
@@ -712,24 +721,27 @@ struct Histos{
 };
 } // namespace
 
-class Pixel_BPix_phase1 : public edm::EDAnalyzer, public Histos {
+class Pixel_BPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 
 public:
   explicit Pixel_BPix_phase1(const edm::ParameterSet&// ,edm::ConsumesCollector&&
-	       );
+			     );
   ~Pixel_BPix_phase1();
 
 private:
-  virtual void beginJob() ;
-  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
+  virtual void beginJob() override;
+  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&// ,edm::ConsumesCollector&&
-		       );
-  virtual void endJob() ;
+		       ) override;
+  virtual void endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override {}
+  virtual void endJob() override;
 
   edm::InputTag _triggerSrc;
   std::string _ttrhBuilder;
   HLTConfigProvider HLTConfig;
   bool singleParticleMC;
+  bool Template;
+  bool Generic;
   edm::EDGetTokenT<reco::BeamSpot>  t_offlineBeamSpot_;
   edm::EDGetTokenT<reco::VertexCollection> t_offlinePrimaryVertices_ ;
   edm::EDGetTokenT<edm::TriggerResults> t_triggerSrc_ ;
@@ -769,7 +781,8 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   singleParticleMC  = iConfig.getUntrackedParameter<bool>("singleParticleMC",false);
   std::cout<<_triggerSrc<<" "<<_triggerSrc.label()<<" "<<_triggerSrc.process()<<" "
 	   <<_triggerSrc.instance()<<" "<<std::endl;
-
+  Template=iConfig.getParameter<bool>("Template");
+  Generic=iConfig.getParameter<bool>("Generic");
   //Definition of parameters
   esTokenTTopo_ = esConsumes(),
   fitterToken_ = esConsumes(edm::ESInputTag("","KFFittingSmootherWithOutliersRejectionAndRK")),
@@ -787,6 +800,8 @@ Pixel_BPix_phase1::Pixel_BPix_phase1(const edm::ParameterSet& iConfig// , edm::C
   // _OC_beginning=iConfig.getParameter<int>("orbit_beginning");
   // _OC_end=iConfig.getParameter<int>("orbit_end");
   // tok_caloHH_ = consumes<edm::PCaloHitContainer>(edm::InputTag("g4SimHits", "HcalHits"));
+  
+  usesResource("TFileService");
 }
 //
 // destructor:
@@ -3208,7 +3223,6 @@ void Pixel_BPix_phase1::beginJob()
 void Pixel_BPix_phase1::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 	const int run = iRun.run();
-
 	std::map<int, Histos>::iterator iter = runmap.find(run);
 	if(iter != runmap.end())
 	{
@@ -3251,21 +3265,39 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     const double twopi = 2*pi;
     const double pihalf = 2*atan(1);
     //const double sqrtpihalf = sqrt(pihalf);
-	
-    myCounters::neve++;
-    if( myCounters::prevrun != iEvent.run() ){
-
-      time_t unixZeit = iEvent.time().unixTime();
-      cout << "new run " << iEvent.run();
-      cout << ", LumiBlock " << iEvent.luminosityBlock();
-      cout << " taken " << ctime(&unixZeit); // ctime has endline
-
-      myCounters::prevrun = iEvent.run();
-
-    }// new run
-
     int idbg = 0;  // printout for the first few events
-    if( myCounters::neve < 1 ) idbg = 1;
+
+    if (Template){
+      Counter_Template::neve++;
+      if( Counter_Template::prevrun != iEvent.run() ){
+
+	time_t unixZeit = iEvent.time().unixTime();
+	cout << "new run " << iEvent.run();
+	cout << ", LumiBlock " << iEvent.luminosityBlock();
+	cout << " taken " << ctime(&unixZeit); // ctime has endline
+
+	Counter_Template::prevrun = iEvent.run();
+
+      }// new run
+
+      if( Counter_Template::neve < 1 ) idbg = 1;
+    }
+
+    if (Generic){
+      Counter_Generic::neve++;
+      if( Counter_Generic::prevrun != iEvent.run() ){
+
+	time_t unixZeit = iEvent.time().unixTime();
+	cout << "new run " << iEvent.run();
+	cout << ", LumiBlock " << iEvent.luminosityBlock();
+	cout << " taken " << ctime(&unixZeit); // ctime has endline
+
+	Counter_Generic::prevrun = iEvent.run();
+
+      }// new run
+
+      if( Counter_Generic::neve < 1 ) idbg = 1;
+    }
 
     int jdbg = 0; // special printout
 
@@ -3460,16 +3492,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
     h036->Fill( hp.numberOfValidPixelBarrelHits() );
     h037->Fill( hp.trackerLayersWithMeasurement() );
     h038->Fill( hp.pixelBarrelLayersWithMeasurement() );
-    //CUSTOM BPIX pt cut
-    if(pt>12)     {
+    
+    if(pt>BPIX_ptcut)     {
       h037_1->Fill( hp.trackerLayersWithMeasurement() );
       h040->Fill( iTrack->normalizedChi2());
       h041->Fill( iTrack->ptError());
       h042->Fill( iTrack->qualityMask());
       h043->Fill( hp.trackerLayersWithMeasurement(), iTrack->normalizedChi2());
       h044->Fill( hp.trackerLayersWithMeasurement(), iTrack->ptError());
-      //CUSTOM FPIX pt cut
-    } else if(pt>4) {
+      
+    } else if(pt>FPIX_ptcut) {
       h037_2->Fill( hp.trackerLayersWithMeasurement() );
       h045->Fill( hp.trackerLayersWithMeasurement(), iTrack->normalizedChi2());
       h046->Fill( hp.trackerLayersWithMeasurement(), iTrack->ptError());
@@ -4566,14 +4598,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	     tTopo->pxbLayer(detId) == 1 ) {
 
 	    // resolution: biased reasiduals in PXB1
-	    //CUSTOM FPIX pt cut
-	    if( pt >  4 ) k100->Fill( dx*1E4 );
-	    //CUSTOM BPIX pt cut
-	    if( pt > 12 ) k101->Fill( dx*1E4 );
+	    
+	    if( pt >  FPIX_ptcut ) k100->Fill( dx*1E4 );
+	    
+	    if( pt > BPIX_ptcut ) k101->Fill( dx*1E4 );
 
 	    //k102->Fill( logpt, abs(dx)*1E4 ); // increasing: seeding bias
-	    //CUSTOM FPIX pt cut
-	    if( pt > 4 ) {
+	    
+	    if( pt > FPIX_ptcut ) {
 
 	      k103->Fill( alf_inc*wt ); //at +-90 deg
 	      k104->Fill( bet_inc*wt ); //-80 to + 80 deg
@@ -4620,14 +4652,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	  if( //PXBDetId( detId ).layer()
 	     tTopo->pxbLayer(detId) == 2 ) {
-	    //CUSTOM FPIX pt cut
-	    if( pt >  4) k120->Fill( dx*1E4 );
-	    //CUSTOM BPIX pt cut
-	    if( pt > 12 ) k121->Fill( dx*1E4 );
+	    
+	    if( pt >  FPIX_ptcut) k120->Fill( dx*1E4 );
+	    
+	    if( pt > BPIX_ptcut ) k121->Fill( dx*1E4 );
 
 	    //k122->Fill( logpt, abs(dx)*1E4 );//decreasing, as expected
-	    //CUSTOM FPIX pt cut
-	    if( pt > 4 ) {
+	    
+	    if( pt > FPIX_ptcut ) {
 
 	      k123->Fill( alf_inc*wt ); //at +-90 deg
 	      k124->Fill( bet_inc*wt ); //
@@ -4674,14 +4706,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//layer
 
 	  if(tTopo->pxbLayer(detId)== 3 ) {
-	    //CUSTOM FPIX pt cut
-	    if( pt >  4 ) k140->Fill( dx*1E4 );
-	    //CUSTOM BPIX pt cut
-	    if( pt > 12 ) k141->Fill( dx*1E4 );
+	   
+	    if( pt >  FPIX_ptcut ) k140->Fill( dx*1E4 );
+	    
+	    if( pt > BPIX_ptcut ) k141->Fill( dx*1E4 );
 
 	    //k142->Fill( logpt, abs(dx)*1E4 );
-	    //CUSTOM FPIX pt cut
-	    if( pt > 4 ) {
+	    
+	    if( pt > FPIX_ptcut ) {
 
 	      k143->Fill( alf_inc*wt ); //at +-90 deg
 	      k144->Fill( bet_inc*wt ); //
@@ -5064,8 +5096,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	if( cogp2 < 79 ) cogx -= 0.01; // big pix
 	if( cogp2 > 80 ) cogx += 0.01; // big pix
 
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	
+	if( pt > FPIX_ptcut ) {
 
 	  // h308->Fill( bb/aa ); // lever arm
 	  hf409->Fill( f2*wt, phiinc*wt );
@@ -5075,8 +5107,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	} // pt > 4
 
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	
+	if( pt > BPIX_ptcut ) {
 	  //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
 	  //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  if( PXB2_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB2_clusSizeX > 1 && PXB2_clusSizeY > 1 ){
@@ -5268,8 +5300,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	} // pt > 12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	
+	if( pt > FPIX_ptcut ) {
 	  hf412->Fill( f2*wt, dca2*1E4 );
 	  hf413->Fill( f2*wt, dz2*1E4 );
 
@@ -5297,8 +5329,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	
+	if( pt > FPIX_ptcut ) {
 
 	  hf422->Fill( f2*wt, abs(dca2)*1E4 );
 	  hf423->Fill( f2*wt, abs(dz2)*1E4 );
@@ -5449,15 +5481,15 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  double s = ks*rho;// signed
 	  double uz2 = uz0 + s*tandip; //track z at R2
 	  double dz2 = zPXB2 - uz2;
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 	    hf508->Fill( bb/aa );//lever arm
 	    hf509->Fill( f2*wt, phiinc*wt );
 	    hf510->Fill( dca2*1E4 );
 	    hf511->Fill( dz2*1E4 );
 	  }
-	  //CUSTOM BPIX pt cut
-	  if( pt > 12 ) {
+	  
+	  if( pt > BPIX_ptcut ) {
 
 	    hf520->Fill( dca2*1E4 );
 	    hf521->Fill( dz2*1E4 );
@@ -5517,8 +5549,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//pt>12
 
 	  // residual profiles: alignment check
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 	    hf512->Fill( f2*wt, dca2*1E4 );
 	    hf513->Fill( f2*wt, dz2*1E4 );
 
@@ -5535,8 +5567,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 
 	    hf522->Fill( f2*wt, abs(dca2)*1E4 );
 	    hf523->Fill( f2*wt, abs(dz2)*1E4 );
@@ -5678,16 +5710,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  double s = ks*rho;// signed
 	  double uz4 = uz0 + s*tandip; //track z at R4
 	  double dz4 = zPXB4 - uz4;
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 	    g507->Fill( bb/aa );//lever arm
 	    g508->Fill( f4*wt, bb/aa );//lever arm
 	    g509->Fill( f4*wt, phiinc*wt );
 	    g510->Fill( dca4*1E4 );
 	    g511->Fill( dz4*1E4 );
 	  }
-	  //CUSTOM BPIX pt cut
-	  if( pt > 12 ) {
+	  
+	  if( pt > BPIX_ptcut ) {
 
 	    g520->Fill( dca4*1E4 );
 	    g521->Fill( dz4*1E4 );
@@ -5748,8 +5780,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }//pt>12
 
 	  // residual profiles: alignment check
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	 
+	  if( pt > FPIX_ptcut ) {
 	    g512->Fill( f4*wt, dca4*1E4 );
 	    g513->Fill( f4*wt, dz4*1E4 );
 
@@ -5777,8 +5809,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 
 	    g522->Fill( f4*wt, abs(dca4)*1E4 );
 	    g523->Fill( f4*wt, abs(dz4)*1E4 );
@@ -6021,8 +6053,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       	  else if( ilad3 == 24 ) halfmod = 1;
       	  else if( ilad3 == 25 ) halfmod = 1;
 	  */
-	  //CUSTOM FPIX pt cut
-      	  if( pt > 4 ) {
+	  
+      	  if( pt > FPIX_ptcut ) {
 
       	    hg308->Fill( bb/aa ); // lever arm
       	    hg409->Fill( f3*wt, phiinc*wt );
@@ -6051,8 +6083,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
       	  } // pt > 4
 
-	  //CUSTOM BPIX pt cut
-      	  if( pt > 12 ) {
+	  
+      	  if( pt > BPIX_ptcut ) {
       	    //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
       	    //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
       	    if( PXB3_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB4_clusProb >0.5 && PXB3_clusSizeX > 1 && PXB3_clusSizeY > 1 ){
@@ -6142,7 +6174,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       		//cout<<" layer 3 "<<tmp11<<" "<<tmp14<<endl;
       		// h088->Fill( tmp11 );
       		// h089->Fill( tmp14 );
-      	      } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
+      	      } else {}
       	    }
 
       	    if(bb/aa < 0.015) hg420_1->Fill(dca3*1E4);
@@ -6288,8 +6320,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  } // pt > 12
 
 	  // residual profiles: alignment check
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 	    hg412->Fill( f3*wt, dca3*1E4 );
 	    hg413->Fill( f3*wt, dz3*1E4 );
 
@@ -6318,8 +6350,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  // point resolution = 1/sqrt(3/2) * triplet middle residual width
 	  // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 
-	  //CUSTOM FPIX pt cut
-	  if( pt > 4 ) {
+	  
+	  if( pt > FPIX_ptcut ) {
 
 	    hg422->Fill( f3*wt, abs(dca3)*1E4 );
 	    hg423->Fill( f3*wt, abs(dz3)*1E4 );
@@ -6474,16 +6506,16 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double uz4 = uz0 + s*tandip; //track z at R4
 	double dz4 = zPXB4 - uz4;
 
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	
+	if( pt > FPIX_ptcut ) {
 	  f507->Fill( bb/aa );//lever arm
 	  f508->Fill( f4*wt, bb/aa );//lever arm
 	  f509->Fill( f4*wt, phiinc*wt );
 	  f510->Fill( dca4*1E4 );
 	  f511->Fill( dz4*1E4 );
 	}
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	
+	if( pt > BPIX_ptcut ) {
 
 	  f520->Fill( dca4*1E4 );
 	  f521->Fill( dz4*1E4 );
@@ -6529,8 +6561,8 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+
+	if( pt > FPIX_ptcut ) {
 	  f512->Fill( f4*wt, dca4*1E4 );
 	  f513->Fill( f4*wt, dz4*1E4 );
 
@@ -6559,8 +6591,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  f522->Fill( f4*wt, abs(dca4)*1E4 );
 	  f523->Fill( f4*wt, abs(dz4)*1E4 );
@@ -6801,8 +6832,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// else if( ilad2 == 24 ) halfmod = 1;
 	// else if( ilad2 == 25 ) halfmod = 1;
 
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  h308->Fill( bb/aa ); // lever arm
 	  h409->Fill( f2*wt, phiinc*wt );
@@ -6831,8 +6861,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	} // pt > 4
 
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	if( pt > BPIX_ptcut ) {
 	  //std::cout <<" PXB2_clusProb " <<  PXB2_clusProb <<" PXB1_clusProb " <<  PXB1_clusProb <<" PXB3_clusProb " <<  PXB3_clusProb <<std::endl;
 	  //	  const SiPixelRecHit *pixhit = dynamic_cast<const SiPixelRecHit*>( &*(*irecHit) );
 	  if( PXB2_clusProb!=-99  && PXB1_clusProb > 0.5  && PXB3_clusProb >0.5 && PXB2_clusSizeX > 1 && PXB2_clusSizeY > 1 ){
@@ -6910,7 +6939,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	      //cout<<" layer 2 "<<tmp11<<" "<<tmp13<<endl;
 	      h088->Fill( tmp11 );
 	      h089->Fill( tmp13 );
-	    } else {   if( myCounters::neve < 10 ) cout<<" lape invalid?"<<endl;}
+	    } else {}
 	  }
 
           if(bb/aa < 0.015) h420_1->Fill(dca2*1E4);
@@ -7072,8 +7101,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	} // pt > 12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  h412->Fill( f2*wt, dca2*1E4 );
 	  h413->Fill( f2*wt, dz2*1E4 );
 
@@ -7103,8 +7131,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
 	//For the properties of the folded normal distribution with mean 0.
 	////https://en.wikipedia.org/wiki/Folded_normal_distribution
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  h422->Fill( f2*wt, abs(dca2)*1E4 );
 	  h423->Fill( f2*wt, abs(dz2)*1E4 );
@@ -7185,8 +7212,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}
 
 	// full modules:
-	//CUSTOM FPIX pt cut
-	if( pt > 4.0 &&
+	if( pt > FPIX_ptcut &&
 	    xmin2 > 0 && xmax2 < 159 && // skip edges
 	    xmin2 != 79 && xmax2 != 79 &&  // skip wide pixels
 	    xmin2 != 80 && xmax2 != 80 ) { // skip wide pixels
@@ -7245,8 +7271,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	  }
 
 	  // highest pt:
-	  //CUSTOM BPIX pt cut
-	  if( pt > 12 ) {
+	  if( pt > BPIX_ptcut ) {
 
 	    if(      lpix*1E4 > 30 && lpix*1E4 < 70 ) h438->Fill( dca2*1E4 ); // 9.1 um
 	    else if( lpix*1E4 < 20 || lpix*1E4 > 80 ) h439->Fill( dca2*1E4 ); // 17.0, two peaks
@@ -7352,8 +7377,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
 	  //if( nrow2 == 2 ) {
 	  if( nrow2 < 3 ) {
-	    //CUSTOM BPIX pt cut
-	    if( pt > 12 && lpix*1E4 > 30 && lpix*1E4 < 70 ) h449->Fill( dca2*1E4 );//9.2
+	    if( pt > BPIX_ptcut && lpix*1E4 > 30 && lpix*1E4 < 70 ) h449->Fill( dca2*1E4 );//9.2
 
 	    h245->Fill( tpix*1E4, etaX2 ); // x from track
 
@@ -7538,15 +7562,13 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho2;// signed
 	double uz2 = uz0 + s*tandip; //track z at R2
 	double dz2 = zPXB2 - uz2;
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  h456->Fill( (kap2 - kap) / kap );
 	  h459->Fill( f2*wt, phiinc*wt );
 	  h460->Fill( dca2*1E4 );
 	  h461->Fill( dz2*1E4 );
 	}
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	if( pt > BPIX_ptcut ) {
 
 	  h470->Fill( dca2*1E4 );
 	  h471->Fill( dz2*1E4 );
@@ -7579,8 +7601,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  h462->Fill( f2*wt, dca2*1E4 );
 	  h463->Fill( f2*wt, dz2*1E4 );
 
@@ -7597,8 +7618,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  h472->Fill( f2*wt, abs(dca2)*1E4 );
 	  h473->Fill( f2*wt, abs(dz2)*1E4 );
@@ -7743,15 +7763,13 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho;// signed
 	double uz1 = uz0 + s*tandip; //track z at R1
 	double dz1 = zPXB1 - uz1;
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  h508->Fill( bb/aa );//lever arm
 	  h509->Fill( f1*wt, phiinc*wt );
 	  h510->Fill( dca1*1E4 );
 	  h511->Fill( dz1*1E4 );
 	}
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	if( pt > BPIX_ptcut ) {
 
 	  h520->Fill( dca1*1E4 );
 	  h521->Fill( dz1*1E4 );
@@ -7865,8 +7883,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  h512->Fill( f1*wt, dca1*1E4 );
 	  h513->Fill( f1*wt, dz1*1E4 );
 
@@ -7883,8 +7900,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  h522->Fill( f1*wt, abs(dca1)*1E4 );
 	  h523->Fill( f1*wt, abs(dz1)*1E4 );
@@ -8050,16 +8066,14 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	double s = ks*rho;// signed
 	double uz3 = uz0 + s*tandip; //track z at R3
 	double dz3 = zPXB3 - uz3;
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  i507->Fill( bb/aa );//lever arm
 	  i508->Fill( f3*wt, bb/aa );//lever arm
 	  i509->Fill( f3*wt, phiinc*wt );
 	  i510->Fill( dca3*1E4 );
 	  i511->Fill( dz3*1E4 );
 	}
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) {
+	if( pt > BPIX_ptcut ) {
 
 	  i520->Fill( dca3*1E4 );
 	  i521->Fill( dz3*1E4 );
@@ -8105,8 +8119,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	}//pt>12
 
 	// residual profiles: alignment check
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 	  i512->Fill( f3*wt, dca3*1E4 );
 	  i513->Fill( f3*wt, dz3*1E4 );
 
@@ -8134,8 +8147,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 	// => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
 	// point resolution = 1/sqrt(3/2) * triplet middle residual width
 	// => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-	//CUSTOM FPIX pt cut
-	if( pt > 4 ) {
+	if( pt > FPIX_ptcut ) {
 
 	  i522->Fill( f3*wt, abs(dca3)*1E4 );
 	  i523->Fill( f3*wt, abs(dz3)*1E4 );
@@ -8261,11 +8273,9 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       h559->Fill( DCA - dcap );
 
       double f2 = atan2( yPXB2, xPXB2 );//position angle in layer 2
-      //CUSTOM FPIX pt cut
-      if( pt > 4 ) {
+      if( pt > FPIX_ptcut ) {
 	h560->Fill( DCA*1E4 );
-	//CUSTOM BPIX pt cut
-	if( pt > 12 ) h561->Fill( DCA*1E4 );
+	if( pt > BPIX_ptcut ) h561->Fill( DCA*1E4 );
 	h562->Fill( f2*wt, DCA*1E4 );
 	h564->Fill( f2*wt, abs(DCA)*1E4 );
       }
@@ -8366,15 +8376,13 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
       if( phiinc > pihalf ) phiinc -= pi;
       else if( phiinc < -pihalf ) phiinc += pi;
-      //CUSTOM FPIX pt cut
-      if( pt > 4 ) {
+      if( pt > FPIX_ptcut ) {
 	h607->Fill( bb/aa );//lever arm
 	h608->Fill( phiinc*wt );
 	h609->Fill( f1*wt, phiinc*wt );
 	h610->Fill( dca1*1E4 );
       }
-      //CUSTOM BPIX pt cut
-      if( pt > 12 ) {
+      if( pt > BPIX_ptcut ) {
 
 	h620->Fill( dca1*1E4 );
         if( abs( phi1 - phiN1 ) < pihalf ) // outward facing module
@@ -8422,8 +8430,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       }
 
       // residual profiles: alignment check
-      //CUSTOM FPIX pt cut
-      if( pt > 4 ) {
+      if( pt > FPIX_ptcut ) {
 	h612->Fill( f1*wt, dca1*1E4 );
 	h614->Fill( zPXB1, dca1*1E4 );
 
@@ -8447,8 +8454,7 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
       // => rms = sqrt(pi/2) * mean of abs (sqrt(pi/2) = 1.2533)
       // point resolution = 1/sqrt(3/2) * triplet middle residual width
       // => sqrt(pi/2)*sqrt(2/3) = sqrt(pi/3) = 1.0233, almost one
-      //CUSTOM FPIX pt cut
-      if( pt > 4 ) {
+      if( pt > FPIX_ptcut ) {
 
 	h622->Fill( f1*wt, abs(dca1)*1E4 );
 
@@ -8479,9 +8485,13 @@ void Pixel_BPix_phase1::analyze(const edm::Event& iEvent, const edm::EventSetup&
 // method called just after ending the event loop:
 //
 void Pixel_BPix_phase1::endJob() {
-
-  std::cout << "end of job after " << myCounters::neve << " events.\n";
-
+ 
+  if (Template) {
+  std::cout << "end of job after " << Counter_Template::neve << " events.\n";
+  };
+  if (Generic) {
+  std::cout << "end of job after " << Counter_Generic::neve << " events.\n";  
+  };
 }
 
 //define this as a plug-in
