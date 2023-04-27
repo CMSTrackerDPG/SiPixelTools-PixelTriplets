@@ -106,6 +106,9 @@
 // Flag for new tracking rechis, has to be ON for pre7 and later   
 #define NEW_TRACKINGRECHITS  // For V71X_pre7 and later 
 
+float BPIX_ptcut = 12.;
+float FPIX_ptcut = 4.;
+
 struct Histos{
   TH1D *hclusprob_fpix;
 
@@ -162,15 +165,6 @@ struct Histos{
   void InitFPix_phase1(TFileDirectory* fs);
 };
 
-class myCountersPixel_FPix_phase1{
-   public:
-      static int neve;
-      static unsigned int prevrun;
-};
-
-int myCountersPixel_FPix_phase1::neve = 0;
-unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
-
 class Pixel_FPix_phase1 : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns>, public Histos {
 public:
   explicit Pixel_FPix_phase1(const edm::ParameterSet&);
@@ -191,6 +185,8 @@ private:
   HLTConfigProvider HLTConfig;
   bool doBPix;
   bool doFPix;
+  bool Template;
+  bool Generic;
 
   float dx_res_1 = -999;
   float dz_res_1 = -999;
@@ -385,14 +381,21 @@ private:
 
 };
 
-//class myCountersPixel_FPix_phase1{
-//   public:
-//      static int neve;
-//      static unsigned int prevrun;
-//};
+class Counter_Template{
+   public:
+      static int neve;
+      static unsigned int prevrun;
+};
 
-//int myCountersPixel_FPix_phase1::neve = 0;
-//unsigned int myCountersPixel_FPix_phase1::prevrun = 0;
+class Counter_Generic{
+   public:
+      static int neve;
+      static unsigned int prevrun;
+};
+int Counter_Template::neve = 0;
+unsigned int Counter_Template::prevrun = 0;
+int Counter_Generic::neve = 0;
+unsigned int Counter_Generic::prevrun = 0;
 
 
 Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
@@ -403,6 +406,8 @@ Pixel_FPix_phase1::Pixel_FPix_phase1(const edm::ParameterSet& iConfig)
   _ttrhBuilder = iConfig.getParameter<std::string>("ttrhBuilder");
   doBPix=iConfig.getParameter<bool>("doBPix");
   doFPix=iConfig.getParameter<bool>("doFPix");
+  Template=iConfig.getParameter<bool>("Template");
+  Generic=iConfig.getParameter<bool>("Generic");
 
   esTokenTTopo_ = esConsumes(),
   fitterToken_ = esConsumes(edm::ESInputTag("","KFFittingSmootherWithOutliersRejectionAndRK")),
@@ -684,7 +689,6 @@ void Histos::InitBPix_phase1(TFileDirectory* fs)
 
 void Pixel_FPix_phase1::beginJob()
 {
-
 }
 
 //----------------------------------------------------------------------
@@ -834,19 +838,31 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
   runNumber_res = -1;
   lumiBlock_res = -1;
 
-  myCountersPixel_FPix_phase1::neve++;
-  
-  if( myCountersPixel_FPix_phase1::prevrun != iEvent.run() ){
-    time_t unixZeit = iEvent.time().unixTime();
-    cout << "new run " << iEvent.run();
-    cout << ", LumiBlock " << iEvent.luminosityBlock();
-    cout << " taken " << ctime(&unixZeit); // ctime has endline
-    myCountersPixel_FPix_phase1::prevrun = iEvent.run();
-  }// new run
-  
   int idbg = 0;
-  if( myCountersPixel_FPix_phase1::neve < 2 ) idbg = 1;
-  
+
+  if (Template) {
+    Counter_Template::neve++;
+    if( Counter_Template::prevrun != iEvent.run() ){
+      time_t unixZeit = iEvent.time().unixTime();
+      cout << "new run " << iEvent.run();
+      cout << ", LumiBlock " << iEvent.luminosityBlock();
+      cout << " taken " << ctime(&unixZeit); // ctime has endline
+      Counter_Template::prevrun = iEvent.run();
+    }// new run
+    if( Counter_Template::neve < 2 ) idbg = 1;
+  };
+  if (Generic) {
+    Counter_Generic::neve++;
+    if( Counter_Generic::prevrun != iEvent.run() ){
+      time_t unixZeit = iEvent.time().unixTime();
+      cout << "new run " << iEvent.run();
+      cout << ", LumiBlock " << iEvent.luminosityBlock();
+      cout << " taken " << ctime(&unixZeit); // ctime has endline
+      Counter_Generic::prevrun = iEvent.run();
+    }// new run
+    if( Counter_Generic::neve < 2 ) idbg = 1;
+  };
+
   int jdbg = 0;
   if( idbg ) {
     cout << endl;
@@ -1056,8 +1072,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
     h037->Fill( hp.trackerLayersWithMeasurement() );
     h038->Fill( hp.pixelBarrelLayersWithMeasurement() );
     h039->Fill( hp.pixelEndcapLayersWithMeasurement() );
-    //CUSTOM FPIX pt cut
-    if(pt>4)     {
+    if(pt>FPIX_ptcut)     {
       h037_1->Fill( hp.trackerLayersWithMeasurement() );
       h040->Fill( iTrack->normalizedChi2());
       h041->Fill( iTrack->ptError());
@@ -1908,8 +1923,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             numberOfTracksCount123++;
           }
 	  //pt_12_tracks.push_back(pt);
-	  //CUSTOM FPIX pt cut
-	  if(pt>4){
+	  if(pt>FPIX_ptcut){
 	    pt_4_tracks.push_back(pt);
 	    dx_res_1 = residual_x_2;
 	    dz_res_1 = residual_y_2;
@@ -1962,8 +1976,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM BPIX pt cut
-	  if(pt>12){	  
+	  if(pt>BPIX_ptcut){	  
 	    //pt_12_tracks.push_back(pt);
 	    h420b1_123->Fill( residual_x_1 );
 	    h421b1_123->Fill( residual_y_1 );
@@ -2072,8 +2085,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount124++;
 	  }
-          //CUSTOM FPIX pt cut
-	  if(pt>4){
+	  if(pt>FPIX_ptcut){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2111,8 +2123,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM BPIX pt cut
-	  if(pt>12){	  
+	  if(pt>BPIX_ptcut){	  
 	    
 	    h420b1_124->Fill( residual_x_1 );
 	    h421b1_124->Fill( residual_y_1 );
@@ -2220,8 +2231,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount134++;
 	  }
-          //CUSTOM FPIX pt cut
-	  if(pt>4){
+	  if(pt>FPIX_ptcut){
 
 	    hclusprob_fpix ->Fill(clusProb_FPix_phase1);
 	    
@@ -2259,8 +2269,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM BPIX pt cut
-	  if(pt>12){	  
+	  if(pt>BPIX_ptcut){	  
 	    
 	    h420b1_134->Fill( residual_x_1 );
 	    h421b1_134->Fill( residual_y_1 );
@@ -2431,8 +2440,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
             isTriplet = true;
             numberOfTracksCount234++;
           }
-	  //CUSTOM FPIX pt cut
-	  if(pt>4){
+	  if(pt>FPIX_ptcut){
 
 	    dx_res_2 = residual_x_3;
 	    dz_res_2 = residual_y_3;
@@ -2503,8 +2511,7 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
       
 	// Fill Histograms for BPIX
 	else if(detTag == "bpix"){
-	  //CUSTOM BPIX pt cut
-	  if(pt>12){	  
+	  if(pt>BPIX_ptcut){	  
 	    
 	    h420b2_234->Fill( residual_x_2 );
 	    h421b2_234->Fill( residual_y_2 );
@@ -2567,9 +2574,12 @@ void Pixel_FPix_phase1::getResiduals(const edm::Event & iEvent, const edm::Event
 // method called just after ending the event loop:
 //
 void Pixel_FPix_phase1::endJob() {
-  
-  std::cout << "end of job after " << myCountersPixel_FPix_phase1::neve << " events.\n";
-  
+  if (Template){
+    std::cout << "end of job after " << Counter_Template::neve << " events.\n";
+  };
+  if (Generic){
+    std::cout << "end of job after " << Counter_Generic::neve << " events.\n";
+  };
 }
 
 //define this as a plug-in
