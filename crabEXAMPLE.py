@@ -17,6 +17,7 @@ config.Data.publication = False
 config.Data.unitsPerJob = 1
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
+config.Data.lumiMask = 'LUMIMASK'
 config.Data.outLFNDirBase = 'OUTPUTDIR'
 config.section_('Site')
 config.Site.blacklist = ['T2_BR_SPRACE', 'T3_UK_London_QMUL']

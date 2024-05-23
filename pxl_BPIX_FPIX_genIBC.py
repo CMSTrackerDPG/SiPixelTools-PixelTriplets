@@ -26,11 +26,10 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-#options.inputFiles = []
+options.inputFiles = []
 options.maxEvents = -1
 options.outputFile = "tree.root"
 options.parseArguments()
-#root://cms-xrd-global.cern.ch/
 
 # Input source
 process.source = cms.Source("PoolSource",
@@ -67,14 +66,8 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Express_v2', '')
-"""
-process.GlobalTag.toGet = cms.VPSet(
-  cms.PSet(record = cms.string("TrackerAlignmentRcd"),
-           tag = cms.string("TrackerAlignment_EOY21_v1"),
-          )
-)
-"""
+process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v2', '')
+
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
@@ -92,17 +85,17 @@ associatePatAlgosToolsTask(process)
 
 # Refitter
 
-#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
-#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
-process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
-process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
+process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuonTight'
+#process.MeasurementTrackerEvent.pixelClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
+#process.MeasurementTrackerEvent.stripClusterProducer = 'ALCARECOSiPixelCalSingleMuon'
 #process.MeasurementTrackerEvent.pixelClusterProducer = 'siPixelClusters'
 #process.MeasurementTrackerEvent.stripClusterProducer = 'siStripClusters'
 process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag()
 
-#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonTight'
-process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
+process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuonTight'
+#process.TrackRefitter.src = 'ALCARECOSiPixelCalSingleMuon'
 #process.TrackRefitter.src = 'generalTracks'
 process.TrackRefitter.TrajectoryInEvent = True
 process.TrackRefitter_step = cms.Path(process.offlineBeamSpot * process.MeasurementTrackerEvent * process.TrackRefitter)
@@ -123,8 +116,8 @@ process.hltFilter_step = cms.Path(process.HLTFilter)
 process.BPixResolution_Template = cms.EDAnalyzer('Pixel_BPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuonTight'),
-                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuon'),
+                                                 track_collection = cms.string('ALCARECOSiPixelCalSingleMuonTight'),
+                                                 #track_collection = cms.string('ALCARECOSiPixelCalSingleMuon'),
                                                  #track_collection = cms.string('generalTracks'),
                                                  Template = cms.bool(True),
                                                  Generic = cms.bool(False)
@@ -139,8 +132,8 @@ process.BPixResolution_Generic = process.BPixResolution_Template.clone(
 process.FPixResolution_Template = cms.EDAnalyzer('Pixel_FPix_phase1',
                                                  triggerSource = cms.InputTag('TriggerResults::RECO'),
                                                  ttrhBuilder = cms.string('WithAngleAndTemplate'),
-                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuonTight'),
-                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),
+                                                 track_collection=cms.string('ALCARECOSiPixelCalSingleMuonTight'),
+                                                 #track_collection=cms.string('ALCARECOSiPixelCalSingleMuon'),
                                                  #track_collection=cms.string('generalTracks'),
                                                  doBPix = cms.bool(False),
                                                  doFPix = cms.bool(True),
