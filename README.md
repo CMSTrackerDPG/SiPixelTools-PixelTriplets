@@ -45,14 +45,16 @@ The code is best run with CRAB. One example of a CRAB submit file is included.
 Change following lines:
  
 - `config.General.requestName` 
-- `config.JobType.psetName` # path to the `pxl_BPIX_FPIX_genIBC.py` code to be run
-- `config.Data.inputDataset` # DAS path to file
+- `config.JobType.psetName`  path to the `pxl_BPIX_FPIX_genIBC.py` code to be run
+- `config.Data.inputDataset`  DAS path to file
 - `config.Data.outputDatasetTag`
-- `config.Data.lumiMask` #take the current lumi mask
-- `config.Data.outLFNDirBase` # Path to output directory
-- `config.Site.storageSite` # If you have access to the PSI tier 3 this is `T3_CH_PSI`.
+- `config.Data.lumiMask` take the current lumi mask
+- `config.Data.outLFNDirBase`  Path to output directory
+- `config.Site.storageSite`  If you have access to the PSI tier 3 this is `T3_CH_PSI`.
 
-``requestName`` is the name for the CRAB job, ``psetName`` is the code to run, which in our case is ``pxl_BPIX_FPIX_genIBC.py``, ``inputDataset`` is the DAS path to the dataset, ``outputDatasetTag`` is the name of the output, ``lumiMask`` should be the most up to data lumimask for the year of data processing, to be found in [Collisions24] (https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/) for 2024, ``outLFNDirBase`` is the path to the directory where you want the output to be stored and  ``storageSite`` needs the tier3 you have access to.
+``requestName`` is the name for the CRAB job, ``psetName`` is the code to run, which in our case is ``pxl_BPIX_FPIX_genIBC.py``, ``inputDataset`` is the DAS path to the dataset, ``outputDatasetTag`` is the name of the output, ``lumiMask`` should be the most up to data lumimask for the year of data processing, to be found in [Collisions24](https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/) for 2024, ``outLFNDirBase`` is the path to the directory where you want the output to be stored and  ``storageSite`` needs the tier3 you have access to.
+
+Make sure that `process.GlobalTag` in ``pxl_BPIX_FPIX_genIBC.py`` is correct before running the CRAB jobs.
 
 ## Downstream code
 
