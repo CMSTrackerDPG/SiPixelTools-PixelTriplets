@@ -26,11 +26,10 @@ process.load("RecoTracker.MeasurementDet.MeasurementTrackerEventProducer_cfi")
 
 
 options = VarParsing.VarParsing ('analysis')
-options.inputFiles = ["/store/data/Run2024B/Muon0/ALCARECO/SiPixelCalSingleMuonTight-PromptReco-v1/000/379/010/00000/bf2f6d03-de23-47a8-be83-df382e2ac3fd.root"]
+options.inputFiles = []
 options.maxEvents = -1
 options.outputFile = "tree.root"
 options.parseArguments()
-#root://cms-xrd-global.cern.ch/
 
 # Input source
 process.source = cms.Source("PoolSource",
@@ -68,13 +67,7 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v2', '')
-"""
-process.GlobalTag.toGet = cms.VPSet(
-  cms.PSet(record = cms.string("TrackerAlignmentRcd"),
-           tag = cms.string("TrackerAlignment_EOY21_v1"),
-          )
-)
-"""
+
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
